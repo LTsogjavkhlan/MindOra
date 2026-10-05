@@ -7,6 +7,7 @@ const router = createCrudRouter(Category, {
     itemKey: 'category',
     notFoundMessage: 'Ангилал олдсонгүй.',
     uploadMiddleware: upload.single('icon'),
+    imageUrls: (category) => [category.iconUrl],
     async buildData(req) {
         const data = { ...req.body };
         if (req.file) data.iconUrl = await uploadImageBuffer(req.file.buffer);

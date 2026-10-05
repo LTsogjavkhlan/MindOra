@@ -60,8 +60,27 @@
     // submitted), calls apiFetch, and reports errors inline. Shared by
     // every admin section's show*Form() - only the URL/body/success
     // handling differ between them.
+    // Ties each `.form-row > label` to its row's control (for/id, ids scoped
+    // to the form so two open forms can't collide), and gives label-less
+    // extra controls (e.g. the image alt-text field) an aria-label from
+    // their placeholder - so every field is clickable and announced.
+    function linkLabels(form) {
+        form.querySelectorAll('.form-row').forEach((row) => {
+            const label = row.querySelector(':scope > label');
+            const controls = row.querySelectorAll(':scope > input, :scope > textarea, :scope > select');
+            controls.forEach((control, i) => {
+                control.id ||= `${form.id}-${control.name || 'field'}${i ? `-${i}` : ''}`;
+                if (i === 0 && label) label.htmlFor = control.id;
+                else if (!control.hasAttribute('aria-label')) {
+                    control.setAttribute('aria-label', control.placeholder || label?.textContent || control.name);
+                }
+            });
+        });
+    }
+
     function bindAdminForm(formId, { buildUrl, buildOptions, errorElId, onSuccess }) {
         const form = document.getElementById(formId);
+        linkLabels(form);
         const submitBtn = form.querySelector('button[type="submit"]');
         const errorEl = document.getElementById(errorElId);
         form.addEventListener('submit', async (e) => {
@@ -86,6 +105,7 @@
     const loginForm = document.getElementById('login-form');
     const loginError = document.getElementById('login-error');
     const loginSuccess = document.getElementById('login-success');
+    const adminStatus = document.getElementById('admin-status');
     const loginSubmitBtn = document.getElementById('login-submit-btn');
     const loginSubmitLabel = loginSubmitBtn.querySelector('.btn-label');
 
@@ -102,7 +122,7 @@
     function setLoginLoading(isLoading) {
         loginSubmitBtn.disabled = isLoading;
         loginSubmitBtn.classList.toggle('is-loading', isLoading);
-        loginSubmitLabel.textContent = isLoading ? 'Нэвтэрч байна...' : 'Нэвтрэх';
+        loginSubmitLabel.textContent = isLoading ? 'Нэвтэрч байна…' : 'Нэвтрэх';
     }
 
     async function checkAuth() {
@@ -144,7 +164,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
             });
-            showAlert(loginSuccess, 'Амжилттай нэвтэрлээ! Хяналтын самбарыг ачааллаж байна...');
+            showAlert(loginSuccess, 'Амжилттай нэвтэрлээ! Хяналтын самбарыг ачааллаж байна…');
             // Brief pause so the success message is actually readable, then
             // fade the login screen out before swapping to the dashboard.
             await new Promise((resolve) => setTimeout(resolve, 500));
@@ -244,7 +264,7 @@
                     <input type="file" name="image" accept="image/*">
                     <input type="text" name="imageAlt" placeholder="Зургийн тайлбар (хараа бэрхшээлтэй хэрэглэгчдэд)" value="${escapeHtml(slide?.imageAlt)}">
                 </div>
-                <p class="error-text" id="home-hero-error"></p>
+                <p class="error-text" role="alert" id="home-hero-error"></p>
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">Хадгалах</button>
                     <button type="button" class="btn-secondary" id="home-hero-cancel">Цуцлах</button>
@@ -300,7 +320,7 @@
                     <input type="file" name="image" accept="image/*">
                     <input type="text" name="imageAlt" placeholder="Зургийн тайлбар (хараа бэрхшээлтэй хэрэглэгчдэд)" value="${escapeHtml(slide?.imageAlt)}">
                 </div>
-                <p class="error-text" id="${page}-hero-error"></p>
+                <p class="error-text" role="alert" id="${page}-hero-error"></p>
                 <p class="success-text" id="${page}-hero-success"></p>
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">${SIMPLE_HERO_LABELS[page]}-т хийсэн өөрчлөлтийг хадгалах</button>
@@ -334,11 +354,12 @@
 
     async function deleteItem(url, reload, confirmMessage) {
         if (!confirm(confirmMessage || 'Устгах уу? Энэ үйлдлийг буцаах боломжгүй.')) return;
+        hideAlert(adminStatus);
         try {
             await apiFetch(url, { method: 'DELETE' });
             (Array.isArray(reload) ? reload : [reload]).forEach((fn) => fn());
         } catch (err) {
-            alert('Устгаж чадсангүй: ' + err.message);
+            showAlert(adminStatus, `Устгаж чадсангүй: ${err.message}`);
         }
     }
 
@@ -405,7 +426,7 @@
                     <input type="file" name="images" accept="image/*" multiple>
                     <p class="section-hint" style="margin:0.25rem 0 0;">Шинэ зураг оруулбал энэ бүтээгдэхүүний бүх зургийг (галерейг оролцуулан) орлуулна. Одоогийн зургийг хадгалахыг хүсвэл хоосон орхино уу.</p>
                 </div>
-                <p class="error-text" id="product-error"></p>
+                <p class="error-text" role="alert" id="product-error"></p>
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">Хадгалах</button>
                     <button type="button" class="btn-secondary" id="product-cancel">Цуцлах</button>
@@ -482,7 +503,7 @@
                     <input type="file" name="icon" accept="image/*">
                     <input type="text" name="iconAlt" placeholder="Дүрсний тайлбар (хараа бэрхшээлтэй хэрэглэгчдэд)" value="${escapeHtml(category?.iconAlt)}">
                 </div>
-                <p class="error-text" id="category-error"></p>
+                <p class="error-text" role="alert" id="category-error"></p>
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">Хадгалах</button>
                     <button type="button" class="btn-secondary" id="category-cancel">Цуцлах</button>
@@ -567,7 +588,7 @@
                         <input type="number" name="order" value="${section ? section.order : 0}" min="0">
                     </div>
                 </div>
-                <p class="error-text" id="section-error"></p>
+                <p class="error-text" role="alert" id="section-error"></p>
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">Хадгалах</button>
                     <button type="button" class="btn-secondary" id="section-cancel">Цуцлах</button>
@@ -676,7 +697,7 @@
                     <input type="file" name="image" accept="image/*">
                     <input type="text" name="imageAlt" placeholder="Зургийн тайлбар (хараа бэрхшээлтэй хэрэглэгчдэд)" value="${escapeHtml(course?.imageAlt)}">
                 </div>
-                <p class="error-text" id="course-error"></p>
+                <p class="error-text" role="alert" id="course-error"></p>
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">Хадгалах</button>
                     <button type="button" class="btn-secondary" id="course-cancel">Цуцлах</button>
@@ -767,7 +788,7 @@
                     <label>"Бүрэн Судалгааг Үзэх" холбоосын URL</label>
                     <input type="text" name="studyLink" value="${escapeHtml(card?.studyLink || '#')}">
                 </div>
-                <p class="error-text" id="advice-error"></p>
+                <p class="error-text" role="alert" id="advice-error"></p>
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">Хадгалах</button>
                     <button type="button" class="btn-secondary" id="advice-cancel">Цуцлах</button>

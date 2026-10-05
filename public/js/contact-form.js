@@ -37,6 +37,7 @@ function initContactForm() {
         form.querySelectorAll('.error-message').forEach((el) => {
             el.textContent = '';
         });
+        form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
     }
 
     function showFieldError(field, message) {
@@ -44,13 +45,14 @@ function initContactForm() {
         if (errorEl) {
             errorEl.textContent = message;
         }
+        form.querySelector(`#${field}`)?.setAttribute('aria-invalid', 'true');
     }
 
     function setLoading(isLoading) {
         if (!submitButton) return;
         submitButton.disabled = isLoading;
         const target = submitButtonLabel || submitButton;
-        target.textContent = isLoading ? 'Илгээж байна...' : originalButtonText;
+        target.textContent = isLoading ? 'Илгээж байна…' : originalButtonText;
     }
 
     form.addEventListener('submit', async function (e) {
@@ -87,6 +89,7 @@ function initContactForm() {
         }
 
         if (hasError) {
+            form.querySelector('[aria-invalid="true"]')?.focus();
             showStatus('Тэмдэглэсэн талбаруудыг засна уу.', 'error');
             return;
         }

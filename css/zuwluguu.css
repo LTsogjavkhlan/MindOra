@@ -236,6 +236,11 @@ h4 {
 
 .card-link {
     display: inline-block;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    cursor: pointer;
     color: var(--accent-color);
     font-weight: 600;
     text-decoration: none;
@@ -342,6 +347,7 @@ h4 {
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    overscroll-behavior: contain;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -396,14 +402,6 @@ h4 {
     color: var(--accent-color);
     font-weight: 600;
     text-decoration: none;
-}
-
-/* Footer */
-footer {
-    text-align: center;
-    padding: 2rem;
-    background: var(--dark-blue);
-    color: var(--white);
 }
 
 /* Responsive */

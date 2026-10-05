@@ -5,7 +5,17 @@ Base Styles: Reset and global settings for all elements
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    scroll-behavior: smooth;
+}
+
+:root {
+    /* Dark theme: native scrollbars, form controls and autofill match it */
+    color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
 }
 
 body {
@@ -14,6 +24,42 @@ body {
     line-height: 1.6;
     padding-top: 60px;
     /* Offset for fixed menu */
+}
+
+/* Keep anchor targets / focused sections clear of the fixed menu */
+[id] {
+    scroll-margin-top: 72px;
+}
+
+h1,
+h2,
+h3 {
+    text-wrap: balance;
+}
+
+a,
+button,
+[role="button"],
+input,
+select,
+textarea,
+label {
+    touch-action: manipulation;
+}
+
+/* Visible keyboard focus everywhere (mouse clicks don't trigger it). The
+   glass buttons use `all: unset`, which wipes outlines, so they're listed
+   explicitly; text fields already have their own glow focus state. */
+:focus-visible,
+.hero-cta .cta-btn:focus-visible,
+.contact-form-container button:focus-visible {
+    outline: 2px solid #3ED0C4;
+    outline-offset: 3px;
+}
+
+.form-group input:focus-visible,
+.form-group textarea:focus-visible {
+    outline: none;
 }
 
 /*
@@ -59,9 +105,9 @@ Main Menu Styles: Fixed navigation bar at the top
     backdrop-filter: blur(10px);
     z-index: 1000;
     height: 65px;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease;
     transform: translateY(0);
-    will-change: transform, height;
+    will-change: transform;
 }
 
 .main-menu nav {
@@ -74,7 +120,6 @@ Main Menu Styles: Fixed navigation bar at the top
     margin: 0 auto;
     height: 100%;
     position: relative;
-    transition: all 0.2s ease;
     gap: 1.25rem;
 }
 
@@ -85,7 +130,7 @@ Logo Styles: Logo container and image in the menu - now centered
     display: flex;
     align-items: center;
     height: 50px;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease;
     background: transparent;
     padding: 0 1rem;
     order: 1;
@@ -95,7 +140,6 @@ Logo Styles: Logo container and image in the menu - now centered
     height: 40px;
     width: auto;
     object-fit: contain;
-    transition: all 0.2s ease;
 }
 
 .logo-container:hover {
@@ -150,7 +194,7 @@ Button Styles: For navigation and general buttons
     overflow: hidden;
     letter-spacing: 0.3px;
     border-radius: 4px;
-    transition: all 0.15s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease, background 0.3s ease;
     text-decoration: none;
     font-family: 'Unbounded', sans-serif;
     transform: translateZ(0);
@@ -179,7 +223,7 @@ Button Styles: For navigation and general buttons
     color: white;
     white-space: nowrap;
     transform: translateY(0);
-    transition: transform 0.15s ease;
+    transition: transform 0.3s ease;
     font-family: 'Unbounded', sans-serif;
     font-weight: 600;
     letter-spacing: 0.3px;
@@ -194,7 +238,7 @@ Button Styles: For navigation and general buttons
     color: #000;
     white-space: nowrap;
     transform: translateY(0);
-    transition: transform 0.15s ease;
+    transition: transform 0.3s ease;
     font-family: 'Unbounded', sans-serif;
     font-weight: 600;
     letter-spacing: 0.3px;
@@ -269,7 +313,7 @@ Common Slider Styles: Container, navigation arrows, and indicators
     border-radius: 50%;
     cursor: pointer;
     z-index: 10;
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
 }
 
 .slider-nav:hover {
@@ -302,7 +346,7 @@ Common Slider Styles: Container, navigation arrows, and indicators
     background: transparent;
     cursor: pointer;
     padding: 0;
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease;
 }
 
 .indicator.active {
@@ -344,7 +388,7 @@ Responsive Design: Adjustments for tablets and mobile devices
         transform: translateY(-50%);
         z-index: 1001;
         border-radius: 4px;
-        transition: all 0.2s ease;
+        transition: background 0.2s ease, transform 0.2s ease;
     }
 
     .hamburger-menu:hover {
@@ -383,7 +427,7 @@ Responsive Design: Adjustments for tablets and mobile devices
         transform: translateY(-20px);
         opacity: 0;
         visibility: hidden;
-        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         z-index: 1000;
     }
@@ -423,7 +467,7 @@ Responsive Design: Adjustments for tablets and mobile devices
         border: 1px solid rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
+        transition: background-color 0.3s ease, transform 0.3s ease, background 0.3s ease;
         position: relative;
         overflow: hidden;
     }
@@ -579,4 +623,205 @@ Responsive Design: Adjustments for tablets and mobile devices
 /* Override any JavaScript hover effects */
 .main-menu nav a.active-section * {
     transition: none !important;
+}
+
+/*
+Site Footer: shared across all 4 pages (index, surgalt, TD, zuwluguu) - each
+page includes an identical copy of this markup, the same way the nav header
+is already duplicated per page in this project (no shared-template system).
+Links use full "page.html#id" hrefs everywhere, including a page linking to
+its own anchors, so the exact same footer HTML works unchanged on every page.
+*/
+.site-footer {
+    background: #1E1A4D;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 4rem 2rem 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.site-footer-top {
+    display: grid;
+    grid-template-columns: 1.4fr repeat(4, 1fr);
+    gap: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-col h3 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 1.1rem;
+}
+
+.footer-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-col a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    transition: color 0.2s ease;
+    width: fit-content;
+}
+
+.footer-col a:hover {
+    color: #3ED0C4;
+}
+
+.footer-social {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
+}
+
+.footer-social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.footer-social-icon:hover {
+    background: #3ED0C4;
+    color: #1E1A4D;
+    transform: translateY(-2px);
+}
+
+.footer-contact-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.footer-contact-icon {
+    font-size: 0.95rem;
+}
+
+.site-footer-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+    max-width: 1200px;
+    margin: 2.5rem auto;
+}
+
+.site-footer-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.site-footer-logo {
+    width: 40px;
+    height: 40px;
+}
+
+.site-footer-word {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 500;
+    font-size: 1.4rem;
+    color: #fff;
+}
+
+.site-footer-word .o {
+    font-weight: 800;
+    color: #3ED0C4;
+}
+
+.site-footer-copyright {
+    text-align: center;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 900px) {
+    .site-footer-top {
+        grid-template-columns: repeat(3, 1fr);
+        row-gap: 2.5rem;
+    }
+
+    .footer-col-brand {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 600px) {
+    .site-footer {
+        padding: 3rem 1.25rem 1.75rem;
+    }
+
+    .site-footer-top {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .footer-col-brand {
+        grid-column: 1 / -1;
+    }
+}
+
+/*
+Back to Top: fixed circular button, shared across all pages. Shown/hidden via
+the .visible class, toggled from js/shared.js's existing scroll listener.
+*/
+.back-to-top {
+    position: fixed;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 900;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease, background 0.3s ease, color 0.3s ease;
+}
+
+.back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.back-to-top:hover {
+    background: #3ED0C4;
+    color: #1E1A4D;
+    transform: translateY(-3px);
+}
+
+.back-to-top svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+@media (max-width: 600px) {
+    .back-to-top {
+        right: 1rem;
+        bottom: 1rem;
+        width: 42px;
+        height: 42px;
+    }
 }

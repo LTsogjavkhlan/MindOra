@@ -421,6 +421,18 @@ select:focus {
     outline-offset: 1px;
 }
 
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid #069494;
+    outline-offset: 2px;
+}
+
+button,
+a,
+label {
+    touch-action: manipulation;
+}
+
 input[type="file"] {
     font-size: 0.85rem;
 }
@@ -467,4 +479,9 @@ input[type="file"] {
 
 .checkbox-row input {
     width: auto;
+}
+
+/* Page-level error (e.g. a failed delete), shown under the header */
+#admin-status {
+    margin: 1rem 1.5rem 0;
 }

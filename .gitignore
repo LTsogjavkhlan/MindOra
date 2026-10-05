@@ -27,3 +27,8 @@ data/*.db
 logs/
 *.log
 npm-debug.log*
+
+# Local AI agent tooling (skills installed via `npx skills add`)
+.agents/
+.claude/
+skills-lock.json

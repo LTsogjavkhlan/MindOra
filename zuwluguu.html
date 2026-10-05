@@ -4,8 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1E1A4D">
+    <link rel="preconnect" href="https://res.cloudinary.com">
+    <link rel="preload" href="/assets/fonts/unbounded-variable-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/fonts/manrope-variable-latin.woff2" as="font" type="font/woff2" crossorigin>
     <title>Zuwluguu - Mentorship & Advice</title>
-    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
     <!-- Local fonts instead of Google CDN -->
     <link rel="stylesheet" href="css/local-fonts.css">
     <link rel="stylesheet" href="css/shared.css">
@@ -14,29 +18,30 @@
 </head>
 
 <body data-page="zuwluguu">
+    <a href="#main-content" class="skip-nav">Үндсэн хэсэг рүү очих</a>
     <!-- Top Menu -->
     <header class="main-menu" role="banner">
         <nav role="navigation" aria-label="Main navigation">
             <!-- Services Navigation -->
             <div class="nav-links nav-links-left">
-                <a href="surgalt.html" class="button js-button" aria-label="Go to Surgalt page">
+                <a href="surgalt.html" class="button" aria-label="Go to Surgalt page">
                     <span class="button__inner">
-                        <span class="button__text js-button__text">Surgalt</span>
-                        <span class="button__hover js-button__hover">Surgalt</span>
+                        <span class="button__text">Surgalt</span>
+                        <span class="button__hover">Surgalt</span>
                     </span>
                 </a>
-                <a href="zuwluguu.html" class="button js-button active-section" aria-current="page"
+                <a href="zuwluguu.html" class="button active-section" aria-current="page"
                     aria-label="Zuwluguu page - currently viewing"
                     style="background-color: #aaaaaa; transform: scale(1); color: #555555; opacity: 0.8; cursor: default;">
                     <span class="button__inner">
-                        <span class="button__text js-button__text" style="color: #555555;">Zuwluguu</span>
-                        <span class="button__hover js-button__hover" style="display: none;">Zuwluguu</span>
+                        <span class="button__text" style="color: #555555;">Zuwluguu</span>
+                        <span class="button__hover" style="display: none;">Zuwluguu</span>
                     </span>
                 </a>
-                <a href="TD.html" class="button js-button" aria-label="Go to TD page">
+                <a href="TD.html" class="button" aria-label="Go to TD page">
                     <span class="button__inner">
-                        <span class="button__text js-button__text">TD</span>
-                        <span class="button__hover js-button__hover">TD</span>
+                        <span class="button__text">TD</span>
+                        <span class="button__hover">TD</span>
                     </span>
                 </a>
             </div>
@@ -62,10 +67,10 @@
 
             <!-- Main Navigation -->
             <div class="nav-links nav-links-right">
-                <a href="index.html#contact" class="button js-button" aria-label="Go to Contact section">
+                <a href="index.html#contact" class="button" aria-label="Go to Contact section">
                     <span class="button__inner">
-                        <span class="button__text js-button__text">Холбоо барих</span>
-                        <span class="button__hover js-button__hover">Холбоо барих</span>
+                        <span class="button__text">Холбоо барих</span>
+                        <span class="button__hover">Холбоо барих</span>
                     </span>
                 </a>
             </div>
@@ -73,31 +78,31 @@
             <!-- Mobile Menu Container -->
             <div class="mobile-nav-links" style="display: none;">
                 <!-- Home Link -->
-                <a href="index.html" class="button js-button" aria-label="Go to homepage">
+                <a href="index.html" class="button" aria-label="Go to homepage">
                     <span class="button__inner">
-                        <span class="button__text js-button__text">Нүүр</span>
-                        <span class="button__hover js-button__hover">Нүүр</span>
+                        <span class="button__text">Нүүр</span>
+                        <span class="button__hover">Нүүр</span>
                     </span>
                 </a>
 
                 <!-- Page Links -->
-                <a href="surgalt.html" class="button js-button" aria-label="Go to Surgalt page">
+                <a href="surgalt.html" class="button" aria-label="Go to Surgalt page">
                     <span class="button__inner">
-                        <span class="button__text js-button__text">Surgalt</span>
-                        <span class="button__hover js-button__hover">Surgalt</span>
+                        <span class="button__text">Surgalt</span>
+                        <span class="button__hover">Surgalt</span>
                     </span>
                 </a>
-                <a href="zuwluguu.html" class="button js-button active-section" aria-current="page"
+                <a href="zuwluguu.html" class="button active-section" aria-current="page"
                     aria-label="Zuwluguu page - currently viewing">
                     <span class="button__inner">
-                        <span class="button__text js-button__text">Zuwluguu</span>
-                        <span class="button__hover js-button__hover">Zuwluguu</span>
+                        <span class="button__text">Zuwluguu</span>
+                        <span class="button__hover">Zuwluguu</span>
                     </span>
                 </a>
-                <a href="TD.html" class="button js-button" aria-label="Go to TD page">
+                <a href="TD.html" class="button" aria-label="Go to TD page">
                     <span class="button__inner">
-                        <span class="button__text js-button__text">TD</span>
-                        <span class="button__hover js-button__hover">TD</span>
+                        <span class="button__text">TD</span>
+                        <span class="button__hover">TD</span>
                     </span>
                 </a>
 
@@ -105,10 +110,10 @@
                 <div class="mobile-nav-divider"></div>
 
                 <!-- Contact Link -->
-                <a href="index.html#contact" class="button js-button" aria-label="Go to Contact section">
+                <a href="index.html#contact" class="button" aria-label="Go to Contact section">
                     <span class="button__inner">
-                        <span class="button__text js-button__text">Холбоо барих</span>
-                        <span class="button__hover js-button__hover">Холбоо барих</span>
+                        <span class="button__text">Холбоо барих</span>
+                        <span class="button__hover">Холбоо барих</span>
                     </span>
                 </a>
             </div>
@@ -124,6 +129,7 @@
         </nav>
     </header>
 
+    <main id="main-content">
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="hero-content">
@@ -136,7 +142,7 @@
     </section>
 
     <!-- Advice Cards Section -->
-    <section class="advice-section">
+    <section id="advice" class="advice-section">
         <div class="section-header">
             <h2 class="section-title">Мэргэжлийн Зөвлөгөө</h2>
             <p class="section-description">Салбарын мэргэжилтнүүдийн бодит зөвлөгөө</p>
@@ -147,7 +153,7 @@
     </section>
 
     <!-- Mentorship Section -->
-    <section class="mentorship-section">
+    <section id="mentorship" class="mentorship-section">
         <div class="mentorship-content">
             <div class="mentorship-text">
                 <h2 class="section-title">Хувь Хүнд Зориулсан Зөвлөгөө</h2>
@@ -159,7 +165,7 @@
                     <li>Онцгой эх сурвалжид хандах боломж</li>
                     <li>Урт хугацааны ажил мэргэжлийн чиглүүлэг</li>
                 </ul>
-                <a href="#" class="cta-button" id="mentor-cta">Зөвлөхөө Олох</a>
+                <a href="#contact" class="cta-button" id="mentor-cta">Зөвлөхөө Олох</a>
             </div>
             <div class="mentorship-image">
                 <div class="image-placeholder"></div>
@@ -169,8 +175,8 @@
 
     <!-- Studies Modal -->
     <div class="modal-overlay" id="study-modal">
-        <div class="modal-content">
-            <button class="modal-close">&times;</button>
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-study-title">
+            <button class="modal-close" type="button" aria-label="Хаах">&times;</button>
             <h3 class="modal-title" id="modal-study-title">Судалгааны Жишээ</h3>
             <div class="modal-body" id="modal-study-content">
                 <!-- Content will be loaded here dynamically -->
@@ -237,32 +243,32 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="name">Нэр</label>
-                            <input type="text" id="name" name="name" placeholder="Таны нэр" required
+                            <input type="text" id="name" name="name" autocomplete="name" placeholder="Таны нэр" required
                                 aria-describedby="name-error">
                             <span id="name-error" class="error-message" aria-live="polite"></span>
                         </div>
                         <div class="form-group">
                             <label for="phone">Утас</label>
-                            <input type="tel" id="phone" name="phone" placeholder="Таны утасны дугаар"
+                            <input type="tel" id="phone" name="phone" autocomplete="tel" inputmode="tel" placeholder="Таны утасны дугаар"
                                 aria-describedby="phone-error">
                             <span id="phone-error" class="error-message" aria-live="polite"></span>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="email">Имэйл</label>
-                        <input type="email" id="email" name="email" placeholder="Таны имэйл хаяг" required
+                        <input type="email" id="email" name="email" autocomplete="email" spellcheck="false" placeholder="Таны имэйл хаяг" required
                             aria-describedby="email-error">
                         <span id="email-error" class="error-message" aria-live="polite"></span>
                     </div>
                     <div class="form-group">
                         <label for="subject">Гарчиг</label>
-                        <input type="text" id="subject" name="subject" placeholder="Таны мессежийн гарчиг"
+                        <input type="text" id="subject" name="subject" autocomplete="off" placeholder="Таны мессежийн гарчиг"
                             aria-describedby="subject-error">
                         <span id="subject-error" class="error-message" aria-live="polite"></span>
                     </div>
                     <div class="form-group">
                         <label for="message">Мессеж</label>
-                        <textarea id="message" name="message" placeholder="Таны мессеж..." required
+                        <textarea id="message" name="message" placeholder="Таны мессеж…" required
                             aria-describedby="message-error"></textarea>
                         <span id="message-error" class="error-message" aria-live="polite"></span>
                     </div>
@@ -288,26 +294,88 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- Local GSAP Scripts -->
-    <script src="js/vendor/gsap.min.js"></script>
-    <script src="js/vendor/ScrollTrigger.min.js"></script>
+    <script src="/js/vendor/gsap.min.js"></script>
+    <script src="/js/vendor/ScrollTrigger.min.js"></script>
 
     <!-- Custom Scripts -->
-    <script src="js/shared.js"></script>
-    <script src="js/html-utils.js"></script>
-    <script src="js/content-loader.js"></script>
-    <script src="js/zuwluguu.js"></script>
-    <script>
-        window.addEventListener('load', () => {
-            const loadingElement = document.querySelector('.loading');
-            if (loadingElement) {
-                loadingElement.style.display = 'none';
-            }
-        });
-    </script>
+    <script src="/js/shared.js"></script>
+    <script src="/js/html-utils.js"></script>
+    <script src="/js/content-loader.js"></script>
+    <script src="/js/zuwluguu.js"></script>
+    <footer class="site-footer" role="contentinfo">
+        <div class="site-footer-top">
+            <div class="footer-col footer-col-brand">
+                <div class="footer-social" aria-label="Сошиал холбоос">
+                    <a href="https://www.linkedin.com/in/your-profile" target="_blank" rel="noopener noreferrer" class="footer-social-icon" aria-label="LinkedIn">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.03-1.85-3.03-1.86 0-2.14 1.45-2.14 2.94v5.66H9.34V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45Z"/></svg>
+                    </a>
+                    <a href="https://github.com/your-username" target="_blank" rel="noopener noreferrer" class="footer-social-icon" aria-label="GitHub">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.3 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>
+                    </a>
+                </div>
+                <a href="mailto:email@example.com" class="footer-contact-link">
+                    <span class="footer-contact-icon" aria-hidden="true">📧</span> email@example.com
+                </a>
+                <a href="tel:+1234567890" class="footer-contact-link">
+                    <span class="footer-contact-icon" aria-hidden="true">📱</span> +123 456 7890
+                </a>
+            </div>
+
+            <div class="footer-col">
+                <h3>Судлах</h3>
+                <a href="surgalt.html">Сургалтын хуудас</a>
+                <a href="surgalt.html#course-sections-container">Бүх хичээл</a>
+                <a href="surgalt.html#contact">Холбоо барих</a>
+            </div>
+
+            <div class="footer-col">
+                <h3>Зөвлөгөө</h3>
+                <a href="zuwluguu.html#advice">Зөвлөгөөний сэдвүүд</a>
+                <a href="zuwluguu.html#mentorship">Хувийн зөвлөгөө</a>
+                <a href="zuwluguu.html#contact">Холбоо барих</a>
+            </div>
+
+            <div class="footer-col">
+                <h3>Худалдаа</h3>
+                <a href="TD.html">Дэлгүүрийн хуудас</a>
+                <a href="TD.html#list-view">Бүх бараа</a>
+                <a href="TD.html#contact">Холбоо барих</a>
+            </div>
+
+            <div class="footer-col">
+                <h3>MindOra</h3>
+                <a href="index.html">Нүүр хуудас</a>
+                <a href="index.html#services">Юу хайж байна?</a>
+                <a href="index.html#about">Бидний тухай</a>
+            </div>
+        </div>
+
+        <div class="site-footer-divider"></div>
+
+        <div class="site-footer-brand">
+            <svg class="site-footer-logo" viewBox="0 0 160 160" role="img" aria-label="MindOra logo" xmlns="http://www.w3.org/2000/svg">
+                <g fill="none" stroke-width="9">
+                    <circle cx="80" cy="80" r="20" stroke="#3ED0C4" stroke-dasharray="90 35" transform="rotate(-90 80 80)" />
+                    <circle cx="80" cy="80" r="35" stroke="#ffffff" stroke-dasharray="158 62" transform="rotate(-50 80 80)" />
+                    <circle cx="80" cy="80" r="50" stroke="#3ED0C4" stroke-dasharray="226 88" transform="rotate(-10 80 80)" />
+                    <circle cx="80" cy="80" r="65" stroke="#ffffff" stroke-dasharray="294 114" transform="rotate(30 80 80)" />
+                </g>
+            </svg>
+            <span class="site-footer-word">Mind<span class="o">Ora</span></span>
+        </div>
+
+        <p class="site-footer-copyright">&copy; 2026 MindOra - Мэргэжлийн Дижитал Үйлчилгээ ба Сургалт</p>
+    </footer>
+
+    <button class="back-to-top" type="button" aria-label="Дээш очих">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l-7 7h4v7h6v-7h4z"/></svg>
+    </button>
+
     <!-- Contact Form -->
-    <script src="js/contact-form.js"></script>
+    <script src="/js/contact-form.js"></script>
 </body>
 
 </html>

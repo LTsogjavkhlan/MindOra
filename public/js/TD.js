@@ -26,7 +26,6 @@ function initializeListSection() {
 
     // Early return if no product cards found
     if (!productCards.length) {
-        console.log('TD.js: No product cards found in list section');
         return;
     }
 
@@ -92,11 +91,7 @@ function initializeListSection() {
     });
 
     const listSection = document.querySelector('.list-section');
-    if (listSection) {
-        observer.observe(listSection);
-    } else {
-        console.log('TD.js: List section not found');
-    }
+    if (listSection) observer.observe(listSection);
 }
 
 // ========== IMAGE GALLERY FUNCTIONALITY ==========

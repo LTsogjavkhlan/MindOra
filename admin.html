@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>MindOra Admin</title>
-    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
     <link rel="stylesheet" href="css/local-fonts.css">
     <link rel="stylesheet" href="css/admin.css">
 </head>
@@ -32,7 +32,7 @@
                 MindOra Admin
             </h1>
             <label for="login-username">Нэвтрэх нэр</label>
-            <input type="text" id="login-username" name="username" autocomplete="username" required>
+            <input type="text" id="login-username" name="username" autocomplete="username" spellcheck="false" autocapitalize="none" required>
             <label for="login-password">Нууц үг</label>
             <input type="password" id="login-password" name="password" autocomplete="current-password" required>
             <button type="submit" id="login-submit-btn">
@@ -68,6 +68,7 @@
                 <button id="logout-btn" class="btn-secondary">Гарах</button>
             </div>
         </header>
+        <p id="admin-status" class="alert alert-error" role="alert" hidden></p>
 
         <nav class="admin-tabs">
             <button class="tab-btn active" data-tab="home" type="button">Нүүр</button>
@@ -134,8 +135,8 @@
         </main>
     </div>
 
-    <script src="js/html-utils.js"></script>
-    <script src="js/admin.js"></script>
+    <script src="/js/html-utils.js"></script>
+    <script src="/js/admin.js"></script>
 </body>
 
 </html>

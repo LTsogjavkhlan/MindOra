@@ -6,7 +6,14 @@
     const PAGE = document.body.dataset.page;
     if (!PAGE) return;
 
-    const HERO_BODY_SELECTOR = { home: '.slide-content p', td: '.hero-subtitle', surgalt: '.hero-description', zuwluguu: '.hero-subtitle' };
+    const HERO_BODY_SELECTOR = { td: '.hero-subtitle', surgalt: '.hero-description', zuwluguu: '.hero-subtitle' };
+    const IMG_FALLBACK = `onerror="this.onerror=null;this.src='/assets/images/placeholder.svg'"`;
+
+    // Escaped as a CSS string so a quote in the URL can't break out of url().
+    const cssUrl = (url) => `url("${String(url).replace(/["\\\n]/g, '\\$&')}")`;
+
+    // Admin-entered SVG path data: only path-command characters can pass.
+    const svgPath = (d) => String(d || '').replace(/[^a-zA-Z0-9.,\s-]/g, '');
 
     function renderSimpleHero(slide) {
         if (!slide) return;
@@ -16,42 +23,43 @@
         if (titleEl) titleEl.textContent = slide.title;
         if (bodyEl) bodyEl.textContent = slide.body;
         if (heroSection && slide.imageUrl) {
-            heroSection.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('${slide.imageUrl}')`;
+            heroSection.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), ${cssUrl(slide.imageUrl)}`;
             heroSection.style.backgroundSize = 'cover';
             heroSection.style.backgroundPosition = 'center';
         }
     }
 
-    function buildSlideEl(slide, index) {
+    function buildSlideEl(slide, index, total) {
         const div = document.createElement('div');
         div.className = 'slide' + (index === 0 ? ' active' : '');
         div.dataset.index = String(index);
         div.setAttribute('role', 'group');
-        div.setAttribute('aria-label', `${slide.title} slide`);
+        div.setAttribute('aria-roledescription', 'slide');
+        div.setAttribute('aria-label', `${index + 1} / ${total}: ${slide.title}`);
 
         const content = document.createElement('div');
         content.className = 'slide-content';
 
-        const h1 = document.createElement('h1');
-        if (index === 0) h1.id = 'hero-title';
-        h1.textContent = slide.title;
-        content.appendChild(h1);
+        // Only the first slide is the page's <h1>; the rest are h2 so the
+        // page has a single top-level heading.
+        const heading = document.createElement(index === 0 ? 'h1' : 'h2');
+        if (index === 0) heading.id = 'hero-title';
+        heading.textContent = slide.title;
+        content.appendChild(heading);
 
         const p = document.createElement('p');
         p.textContent = slide.body;
         content.appendChild(p);
 
-        if (slide.ctaLabel) {
+        const href = safeUrl(slide.ctaLink);
+        if (slide.ctaLabel && href) {
             const ctaWrap = document.createElement('div');
             ctaWrap.className = 'hero-cta';
             ctaWrap.innerHTML = `
                 <div class="button-wrap">
-                    <button type="button" aria-label="${escapeHtml(slide.ctaLabel)}"><span>${escapeHtml(slide.ctaLabel)}</span></button>
+                    <a href="${escapeHtml(href)}" class="cta-btn"><span>${escapeHtml(slide.ctaLabel)}</span></a>
                     <div class="button-shadow" aria-hidden="true"></div>
                 </div>`;
-            ctaWrap.querySelector('button').addEventListener('click', () => {
-                if (slide.ctaLink) window.location.href = slide.ctaLink;
-            });
             content.appendChild(ctaWrap);
         }
 
@@ -59,7 +67,8 @@
 
         const bg = document.createElement('div');
         bg.className = 'slide-bg';
-        bg.innerHTML = `<img src="${escapeHtml(slide.imageUrl)}" data-src="${escapeHtml(slide.imageUrl)}" alt="${escapeHtml(slide.imageAlt)}" class="lazy-load slide-bg-img" loading="${index === 0 ? 'eager' : 'lazy'}">`;
+        const priority = index === 0 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
+        bg.innerHTML = `<img src="${escapeHtml(slide.imageUrl)}" data-src="${escapeHtml(slide.imageUrl)}" alt="${escapeHtml(slide.imageAlt)}" class="lazy-load slide-bg-img" ${priority}>`;
         div.appendChild(bg);
 
         return div;
@@ -72,7 +81,7 @@
         container.querySelectorAll('.slide').forEach((el) => el.remove());
         const navArea = container.querySelector('.slider-nav-area');
         slides.forEach((slide, i) => {
-            const el = buildSlideEl(slide, i);
+            const el = buildSlideEl(slide, i, slides.length);
             if (navArea) container.insertBefore(el, navArea);
             else container.appendChild(el);
         });
@@ -91,7 +100,7 @@
         container.innerHTML = categories.map((cat, i) => `
             <div class="category-card" role="article" aria-labelledby="cat${i}-title">
                 <div class="category-icon" role="img" aria-label="${escapeHtml(cat.title)} icon">
-                    <img src="${escapeHtml(cat.iconUrl)}" alt="${escapeHtml(cat.iconAlt)}" loading="lazy" onerror="this.src='assets/images/placeholder.jpg'">
+                    <img src="${escapeHtml(cat.iconUrl)}" alt="${escapeHtml(cat.iconAlt)}" loading="lazy" ${IMG_FALLBACK}>
                 </div>
                 <h3 id="cat${i}-title" class="category-title">${escapeHtml(cat.title)}</h3>
                 <p class="category-description">${escapeHtml(cat.description)}</p>
@@ -107,14 +116,14 @@
         return `
             <div class="course-card" data-categories="all ${course.badge !== 'none' ? escapeHtml(course.badge) : ''}">
                 <div class="course-image">
-                    <img src="${escapeHtml(course.imageUrl)}" alt="${escapeHtml(course.imageAlt)}" loading="lazy" onerror="this.src='assets/images/placeholder.jpg'">
+                    <img src="${escapeHtml(course.imageUrl)}" alt="${escapeHtml(course.imageAlt)}" loading="lazy" ${IMG_FALLBACK}>
                     ${badgeHtml}
                 </div>
                 <div class="course-content">
                     <div class="course-meta"><span class="course-category">${escapeHtml(course.categoryLabel)}</span></div>
                     <h3 class="course-title">${escapeHtml(course.title)}</h3>
                     <p class="course-description">${escapeHtml(course.description)}</p>
-                    <a href="${escapeHtml(course.linkHref)}" class="course-link">${escapeHtml(course.linkText)}</a>
+                    <a href="${escapeHtml(safeUrl(course.linkHref))}" class="course-link">${escapeHtml(course.linkText)}</a>
                 </div>
             </div>`;
     }
@@ -157,7 +166,7 @@
             const img = p.images && p.images[0];
             return `
                 <div class="product-card" data-category="${escapeHtml(p.category)}">
-                    <div class="product-image" data-product="product-${p._id}">
+                    <div class="product-image" data-product="product-${p._id}" role="button" tabindex="0" aria-haspopup="dialog" aria-label="${escapeHtml(p.title)}: зургууд үзэх">
                         <img src="${escapeHtml(img ? img.url : '')}" alt="${escapeHtml(img ? img.alt : p.title)}" loading="lazy">
                         <div class="gallery-overlay" aria-hidden="true">
                             <div class="gallery-icon">🖼️</div>
@@ -188,11 +197,11 @@
         container.innerHTML = cards.map((card, i) => `
             <div class="advice-card">
                 <div class="card-icon">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="${card.iconSvgPath}"></path></svg>
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="${svgPath(card.iconSvgPath)}"></path></svg>
                 </div>
                 <h3 class="card-title">${escapeHtml(card.title)}</h3>
                 <p class="card-content">${escapeHtml(card.content)}</p>
-                <a href="#" class="card-link" data-study="card-${i}">${escapeHtml(card.linkText)}</a>
+                <button type="button" class="card-link" data-study="card-${i}" aria-haspopup="dialog">${escapeHtml(card.linkText)}</button>
             </div>
         `).join('');
     }
@@ -236,11 +245,63 @@
         grid.innerHTML = cards.slice(0, 3).map((card) => `
             <a href="zuwluguu.html" class="teaser-card teaser-card-advice" role="listitem">
                 <div class="teaser-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="${card.iconSvgPath}"></path></svg>
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="${svgPath(card.iconSvgPath)}"></path></svg>
                 </div>
                 <h3 class="teaser-title">${escapeHtml(card.title)}</h3>
                 <p class="teaser-desc">${escapeHtml(card.content)}</p>
             </a>`).join('');
+    }
+
+    // Trending Now: interleaves real items already fetched for the Featured
+    // Services showcases below (courses/products/advice cards) into one
+    // horizontal row. Only ever shows a badge when the CMS actually set one
+    // (course.badge) - never a fabricated view/interaction count.
+    function trendCardHtml(item) {
+        const media = item.imageUrl
+            ? `<div class="trend-image"><img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.imageAlt || item.title)}" loading="lazy">${item.badgeLabel ? `<span class="trend-badge${item.badge === 'new' ? ' new' : ''}">${escapeHtml(item.badgeLabel)}</span>` : ''}</div>`
+            : `<div class="trend-image"><div class="trend-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="${svgPath(item.iconSvgPath)}"></path></svg></div></div>`;
+
+        return `
+            <a href="${escapeHtml(item.href)}" class="trend-card" role="listitem">
+                ${media}
+                <div class="trend-body">
+                    <span class="trend-type">${escapeHtml(item.typeLabel)}</span>
+                    <h3 class="trend-title">${escapeHtml(item.title)}</h3>
+                    ${item.meta ? `<span class="trend-meta">${escapeHtml(item.meta)}</span>` : ''}
+                    <span class="trend-arrow-row" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17" /></svg>
+                    </span>
+                </div>
+            </a>`;
+    }
+
+    function renderTrending({ courses, featuredCourses, products, adviceCards }) {
+        const track = document.getElementById('trend-track');
+        if (!track) return;
+
+        const studyItems = (featuredCourses.length ? featuredCourses : courses).slice(0, 3).map((c) => ({
+            typeLabel: 'Сургалт', title: c.title, meta: c.categoryLabel,
+            imageUrl: c.imageUrl, imageAlt: c.imageAlt,
+            badge: c.badge, badgeLabel: c.badge === 'popular' ? 'Түгээмэл' : c.badge === 'new' ? 'Шинэ' : '',
+            href: 'surgalt.html',
+        }));
+        const marketItems = products.slice(0, 3).map((p) => {
+            const img = p.images && p.images[0];
+            return { typeLabel: 'Дэлгүүр', title: p.title, meta: p.price, imageUrl: img && img.url, imageAlt: img && img.alt, href: 'TD.html' };
+        });
+        const guidanceItems = adviceCards.slice(0, 2).map((a) => ({
+            typeLabel: 'Зөвлөгөө', title: a.title, meta: '', iconSvgPath: a.iconSvgPath, href: 'zuwluguu.html',
+        }));
+
+        // Round-robin interleave so the row alternates between pillars instead of grouping them.
+        const groups = [studyItems, marketItems, guidanceItems];
+        const items = [];
+        for (let i = 0; items.length < 8 && groups.some((g) => i < g.length); i++) {
+            groups.forEach((g) => { if (g[i]) items.push(g[i]); });
+        }
+
+        if (!items.length) return;
+        track.innerHTML = items.map(trendCardHtml).join('');
     }
 
     async function fetchPageContent(page) {
@@ -254,36 +315,33 @@
         }
     }
 
-    async function loadContent() {
-        let data;
-
+    function render(data) {
         if (PAGE === 'home') {
-            const [home, td, surgalt, zuwluguu] = await Promise.all([
-                fetchPageContent('home'),
-                fetchPageContent('td'),
-                fetchPageContent('surgalt'),
-                fetchPageContent('zuwluguu'),
-            ]);
-            data = home;
-            if (home) renderHomeHero(home.hero);
-            if (td) renderTdTeaser(td.products);
-            if (surgalt) renderSurgaltTeaser(surgalt.courses);
-            if (zuwluguu) renderZuwluguuTeaser(zuwluguu.adviceCards);
-        } else {
-            data = await fetchPageContent(PAGE);
-            if (data) {
-                renderSimpleHero(data.hero[0]);
-                if (PAGE === 'surgalt') {
-                    renderCategories(data.categories);
-                    renderCourseSections(data.sections, data.courses);
-                } else if (PAGE === 'td') {
-                    renderProducts(data.products);
-                } else if (PAGE === 'zuwluguu') {
-                    renderAdviceCards(data.adviceCards);
-                }
-            }
+            renderHomeHero(data.hero);
+            renderTdTeaser(data.products);
+            renderSurgaltTeaser(data.courses);
+            renderZuwluguuTeaser(data.adviceCards);
+            renderTrending(data);
+            return;
         }
 
+        renderSimpleHero(data.hero[0]);
+        if (PAGE === 'surgalt') {
+            renderCategories(data.categories);
+            renderCourseSections(data.sections, data.courses);
+        } else if (PAGE === 'td') {
+            renderProducts(data.products);
+        } else if (PAGE === 'zuwluguu') {
+            renderAdviceCards(data.adviceCards);
+        }
+    }
+
+    // Start the request right away; only the rendering waits for the DOM.
+    const contentPromise = fetchPageContent(PAGE);
+
+    async function loadContent() {
+        const data = await contentPromise;
+        if (data) render(data);
         document.dispatchEvent(new CustomEvent('content:rendered', { detail: data }));
     }
 

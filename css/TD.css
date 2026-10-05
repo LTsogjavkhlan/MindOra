@@ -10,24 +10,6 @@ body[data-page="td"]::before {
     animation: none;
 }
 
-/* Skip Navigation Link */
-.skip-nav {
-    position: absolute;
-    top: -40px;
-    left: 8px;
-    background: #000;
-    color: white;
-    padding: 8px 16px;
-    text-decoration: none;
-    border-radius: 4px;
-    z-index: 9999;
-    transition: top 0.3s;
-}
-
-.skip-nav:focus {
-    top: 8px;
-}
-
 /* Main content container */
 .main-content {
     position: relative;
@@ -108,7 +90,7 @@ body[data-page="td"]::before {
     -webkit-backdrop-filter: blur(10px);
     border-radius: 18px;
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     transform: translateZ(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow:
@@ -134,7 +116,7 @@ body[data-page="td"]::before {
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease;
     z-index: 10;
     border-radius: 18px;
 }
@@ -295,7 +277,7 @@ body[data-page="td"]::before {
         0 15px 35px rgba(0, 0, 0, 0.2),
         0 5px 15px rgba(0, 0, 0, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     cursor: pointer;
     height: auto;
     min-height: 320px;
@@ -465,6 +447,7 @@ body[data-page="td"]::before {
 
 /* Gallery Modal Overlay */
 .gallery-modal {
+    overscroll-behavior: contain;
     position: fixed;
     top: 0;
     left: 0;
@@ -479,7 +462,7 @@ body[data-page="td"]::before {
     justify-content: center;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .gallery-modal.active {
@@ -507,7 +490,7 @@ body[data-page="td"]::before {
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     overflow: hidden;
     transform: scale(0.8) translateY(50px);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .gallery-modal.active .gallery-container {
@@ -541,7 +524,7 @@ body[data-page="td"]::before {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
     color: white;
     font-size: 1.2rem;
     backdrop-filter: blur(10px);
@@ -573,7 +556,7 @@ body[data-page="td"]::before {
     box-shadow:
         0 15px 40px rgba(0, 0, 0, 0.3),
         0 5px 15px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease;
 }
 
 /* Navigation Arrows */
@@ -592,7 +575,7 @@ body[data-page="td"]::before {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
     color: white;
     font-size: 1.2rem;
     z-index: 10;
@@ -646,7 +629,7 @@ body[data-page="td"]::before {
     overflow: hidden;
     cursor: pointer;
     border: 2px solid transparent;
-    transition: all 0.3s ease;
+    transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
 }
 
@@ -654,7 +637,7 @@ body[data-page="td"]::before {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease;
 }
 
 .thumbnail:hover {

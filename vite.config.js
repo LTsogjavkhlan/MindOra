@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import { cpSync } from 'fs';
 import { tmpdir } from 'os';
 import 'dotenv/config';
 
@@ -14,6 +13,9 @@ export default defineConfig({
     },
   },
   build: {
+    // Hashed bundles go under /static so the server can cache them forever,
+    // separate from the unhashed files copied as-is from public/ (assets/, js/).
+    assetsDir: 'static',
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
@@ -24,12 +26,4 @@ export default defineConfig({
       },
     },
   },
-  plugins: [
-    {
-      name: 'copy-js',
-      closeBundle() {
-        cpSync(resolve(__dirname, 'js'), resolve(__dirname, 'dist/js'), { recursive: true });
-      },
-    },
-  ],
 });

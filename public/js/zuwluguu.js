@@ -72,45 +72,46 @@ document.addEventListener('content:rendered', function () {
     const modalTitle = document.getElementById('modal-study-title');
     const modalContent = document.getElementById('modal-study-content');
     const modalLink = document.getElementById('modal-full-study');
-    const closeModal = document.querySelector('.modal-close');
+    const closeModal = studyModal.querySelector('.modal-close');
+    let opener = null;
 
-    // Card link click handlers
-    document.querySelectorAll('.card-link').forEach(link => {
-        link.addEventListener('click', function (e) {
-            e.preventDefault();
-            const studyId = this.getAttribute('data-study');
-            // Advice cards are rendered from MongoDB by js/content-loader.js,
-            // which registers each one's case study on window.__caseStudies.
-            const study = window.__caseStudies && window.__caseStudies[studyId];
-            if (!study) return;
+    function openStudy(study, trigger) {
+        modalTitle.textContent = study.title;
+        modalContent.innerHTML = sanitizeHtml(study.content);
+        // Hide the "full study" link when there's nowhere real to go.
+        const href = safeUrl(study.link);
+        modalLink.hidden = !href || href === '#';
+        modalLink.setAttribute('href', href || '#');
 
-            modalTitle.textContent = study.title;
-            modalContent.innerHTML = study.content;
-            modalLink.setAttribute('href', study.link);
+        opener = trigger;
+        studyModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        document.addEventListener('keydown', onKeydown);
+        closeModal.focus();
+    }
 
-            studyModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
+    function closeStudy() {
+        studyModal.classList.remove('active');
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', onKeydown);
+        opener?.focus();
+    }
+
+    function onKeydown(e) {
+        if (e.key === 'Escape') closeStudy();
+    }
+
+    // Advice cards are rendered from MongoDB by js/content-loader.js,
+    // which registers each one's case study on window.__caseStudies.
+    document.querySelectorAll('.card-link').forEach((button) => {
+        button.addEventListener('click', () => {
+            const study = window.__caseStudies && window.__caseStudies[button.dataset.study];
+            if (study) openStudy(study, button);
         });
     });
 
-    // Mentor CTA button
-    document.getElementById('mentor-cta').addEventListener('click', function (e) {
-        e.preventDefault();
-        // In a real implementation, this would link to a mentor matching page
-        alert('Зөвлөх сонгох боломж удахгүй нэмэгдэнэ!');
-    });
-
-    // Close modal
-    closeModal.addEventListener('click', function () {
-        studyModal.classList.remove('active');
-        document.body.style.overflow = 'auto';
-    });
-
-    // Close modal when clicking outside
-    studyModal.addEventListener('click', function (e) {
-        if (e.target === studyModal) {
-            studyModal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
+    closeModal.addEventListener('click', closeStudy);
+    studyModal.addEventListener('click', (e) => {
+        if (e.target === studyModal) closeStudy();
     });
 });

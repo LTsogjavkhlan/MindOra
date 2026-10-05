@@ -2,38 +2,20 @@ const { Router } = require('express');
 const ContactSubmission = require('../models/ContactSubmission.js');
 const { sendContactMail } = require('../mailer.js');
 const asyncHandler = require('../asyncHandler.js');
+const createRateLimiter = require('../rateLimit.js');
 
 const router = Router();
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^\d{8}$/;
 
-const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
-const RATE_LIMIT_MAX = 5;
-const requestLog = new Map();
+const contactRateLimit = createRateLimiter({
+    windowMs: 10 * 60 * 1000,
+    max: 5,
+    message: 'Хэт олон удаа илгээлээ. Түр хүлээгээд дахин оролдоно уу.',
+});
 
-function isRateLimited(ip) {
-    const now = Date.now();
-    const timestamps = (requestLog.get(ip) || []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-    timestamps.push(now);
-    requestLog.set(ip, timestamps);
-    return timestamps.length > RATE_LIMIT_MAX;
-}
-
-setInterval(() => {
-    const now = Date.now();
-    for (const [ip, timestamps] of requestLog) {
-        if (!timestamps.some((t) => now - t < RATE_LIMIT_WINDOW_MS)) {
-            requestLog.delete(ip);
-        }
-    }
-}, RATE_LIMIT_WINDOW_MS).unref();
-
-router.post('/', asyncHandler(async (req, res) => {
-    if (isRateLimited(req.ip)) {
-        return res.status(429).json({ success: false, message: 'Хэт олон удаа илгээлээ. Түр хүлээгээд дахин оролдоно уу.' });
-    }
-
+router.post('/', contactRateLimit, asyncHandler(async (req, res) => {
     const { name, phone, email, subject, message, sourcePage } = req.body || {};
 
     if (!name || !String(name).trim() || !email || !String(email).trim() || !message || !String(message).trim()) {

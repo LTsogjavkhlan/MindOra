@@ -7,11 +7,11 @@ const path = require('path');
 const fontFiles = [
     {
         url: 'https://fonts.gstatic.com/s/unbounded/v12/Yq6W-LOTXCb04q32xlpwu8Zf.woff2',
-        dest: 'assets/fonts/unbounded-variable-latin.woff2'
+        dest: 'public/assets/fonts/unbounded-variable-latin.woff2'
     },
     {
         url: 'https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSg.woff2',
-        dest: 'assets/fonts/manrope-variable-latin.woff2'
+        dest: 'public/assets/fonts/manrope-variable-latin.woff2'
     },
 ];
 

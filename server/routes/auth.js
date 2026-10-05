@@ -2,11 +2,20 @@ const { Router } = require('express');
 const bcrypt = require('bcrypt');
 const AdminUser = require('../models/AdminUser.js');
 const asyncHandler = require('../asyncHandler.js');
+const createRateLimiter = require('../rateLimit.js');
 
 const router = Router();
 
-router.post('/login', asyncHandler(async (req, res) => {
-    const { username, password } = req.body || {};
+const loginRateLimit = createRateLimiter({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: 'Хэт олон удаа оролдлоо. 15 минутын дараа дахин оролдоно уу.',
+});
+
+router.post('/login', loginRateLimit, asyncHandler(async (req, res) => {
+    // Coerce to strings so a JSON object like {"$ne": null} can never reach the query.
+    const username = typeof req.body?.username === 'string' ? req.body.username : '';
+    const password = typeof req.body?.password === 'string' ? req.body.password : '';
     if (!username || !password) {
         return res.status(400).json({ success: false, message: 'Нэвтрэх нэр болон нууц үгээ оруулна уу.' });
     }

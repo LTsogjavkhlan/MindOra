@@ -1,4 +1,4 @@
-:root {
+﻿:root {
     --primary-color: #ff8a00;
     --secondary-color: #e52e71;
     --background-dark: #1E1A4D;
@@ -11,9 +11,11 @@
 }
 
 /* Skip Navigation Link */
+/* Shared by every page. Pulled fully off-screen by its own height (a fixed
+   negative `top` left its bottom edge visible) and slid in on focus. */
 .skip-nav {
     position: absolute;
-    top: -40px;
+    top: 8px;
     left: 8px;
     background: #000;
     color: white;
@@ -21,12 +23,13 @@
     text-decoration: none;
     border-radius: 4px;
     z-index: 9999;
-    transition: top 0.3s;
+    transform: translateY(calc(-100% - 16px));
+    transition: transform 0.3s;
     font-weight: 600;
 }
 
 .skip-nav:focus {
-    top: 8px;
+    transform: translateY(0);
 }
 
 /* Only basic reset and global styles here - most menu styles come from shared.css */
@@ -79,6 +82,15 @@ body::before {
 
     50% {
         transform: translateY(-20px) rotate(1deg);
+    }
+}
+
+/* This ambient background runs a 20s animation forever on every page view -
+   skip it for users who've asked for reduced motion (also a cheap perf win,
+   since it's one less thing continuously repainting/compositing). */
+@media (prefers-reduced-motion: reduce) {
+    body::before {
+        animation: none;
     }
 }
 
@@ -290,13 +302,13 @@ Hero Section & Slider: Fullscreen hero with image/content slider.
     will-change: opacity, transform;
 }
 
-.slide-content h1 {
+.slide-content :is(h1, h2) {
     font-size: clamp(2.5rem, 6vw, 4.5rem);
     font-weight: 700;
     margin-bottom: 1.5rem;
     transform: translateY(30px);
     opacity: 0;
-    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s;
+    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s, opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s;
     background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 50%, #ffffff 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -306,7 +318,7 @@ Hero Section & Slider: Fullscreen hero with image/content slider.
     line-height: 1.1;
 }
 
-.slide.active .slide-content h1 {
+.slide.active .slide-content :is(h1, h2) {
     transform: translateY(0);
     opacity: 1;
 }
@@ -317,7 +329,7 @@ Hero Section & Slider: Fullscreen hero with image/content slider.
     margin-bottom: 3rem;
     transform: translateY(30px);
     opacity: 0;
-    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s;
+    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s, opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s;
     color: rgba(255, 255, 255, 0.85);
     max-width: 600px;
     line-height: 1.6;
@@ -499,7 +511,7 @@ Slide Indicators: Dots for slider navigation.
     background: transparent;
     cursor: pointer;
     padding: 0;
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease;
 }
 
 .indicator.active {
@@ -507,525 +519,628 @@ Slide Indicators: Dots for slider navigation.
     transform: scale(1.2);
 }
 
+/* Pause/play toggle for the auto-advancing hero slider and testimonial marquee. */
+.carousel-toggle {
+    position: absolute;
+    right: 24px;
+    bottom: 110px;
+    z-index: 10;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.carousel-toggle:hover {
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.carousel-toggle svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+.carousel-toggle .icon-play,
+.carousel-toggle[data-paused="true"] .icon-pause {
+    display: none;
+}
+
+.carousel-toggle[data-paused="true"] .icon-play {
+    display: block;
+}
+
+.marquee-toggle {
+    top: 0;
+    bottom: auto;
+}
+
 /*
-Services Section: Three-card grid layout representing main pages with animated circles background
+Section Eyebrow: small numbered label used to introduce every new homepage
+section, modeled on the MindOra brand book's eyebrow device. Default variant is
+for light (Cloud) backgrounds; -dark is for the indigo sections (Community,
+About, Final CTA); -sm is a compact variant used above showcase sub-headings.
 */
-#services {
-    background: #FBE4EA;
+.section-intro {
+    max-width: 720px;
+    margin: 0 auto 3rem;
+    text-align: center;
+    padding: 0 1rem;
+}
+
+.section-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #069494;
+    margin-bottom: 1rem;
+}
+
+.eyebrow-num {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 700;
+    color: #069494;
+    font-size: 0.8rem;
+}
+
+.section-eyebrow-dark {
+    color: #3ED0C4;
+}
+
+.section-eyebrow-dark .eyebrow-num {
+    color: #3ED0C4;
+}
+
+.section-eyebrow-sm {
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    margin-bottom: 0.5rem;
+}
+
+.services-subtitle {
+    font-size: clamp(1.05rem, 2vw, 1.2rem);
+    color: #33363F;
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+.services-subtitle-dark {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/*
+What Are You Looking For: large navigation cards into the site's three pillars
+(plus a general "Explore" tile). Sits on a light Cloud background so the
+"discover" run of sections (this + Trending + How It Works + Featured) reads
+as one continuous light band before the dark Community/About/CTA close.
+*/
+.explore-section {
+    background: #F6F5F1;
+    padding: 6rem 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.explore-section .section-eyebrow,
+.trending-section .section-eyebrow,
+.how-section .section-eyebrow {
+    justify-content: center;
+}
+
+.explore-section h2,
+.trending-section h2,
+.how-section h2 {
     color: #1E1A4D;
+    background: none;
+    -webkit-text-fill-color: initial;
+    text-shadow: none;
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    margin-bottom: 0.75rem;
+}
+
+.explore-section h2::after,
+.trending-section h2::after,
+.how-section h2::after {
+    display: none;
+}
+
+.explore-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.75rem;
+    max-width: 1150px;
+    margin: 0 auto;
+}
+
+.explore-card {
+    position: relative;
+    display: block;
+    min-height: 340px;
+    border-radius: 22px;
+    overflow: hidden;
+    text-decoration: none;
+    box-shadow: 0 10px 30px rgba(30, 26, 77, 0.1);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    isolation: isolate;
+}
+
+.explore-image {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.explore-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.explore-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(30, 26, 77, 0.35) 0%, rgba(30, 26, 77, 0.88) 100%);
+    transition: background 0.4s ease;
+}
+
+.explore-image-pattern {
+    background: linear-gradient(160deg, #1E1A4D 0%, #3A34A0 100%);
+}
+
+.explore-image-pattern svg {
+    display: block;
+    opacity: 0.5;
+}
+
+.explore-content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 2rem;
+    color: #fff;
+    text-align: left;
+}
+
+.explore-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.explore-content h3 {
+    font-size: 1.5rem;
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.explore-content p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 1.25rem;
+    max-width: 32ch;
+}
+
+.explore-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #3ED0C4;
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+
+.explore-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 22px 45px rgba(30, 26, 77, 0.22);
+}
+
+.explore-card:hover .explore-image img {
+    transform: scale(1.08);
+}
+
+.explore-card:hover .explore-image::after {
+    background: linear-gradient(180deg, rgba(6, 148, 148, 0.25) 0%, rgba(30, 26, 77, 0.88) 100%);
+}
+
+.explore-card:hover .explore-arrow {
+    background: #3ED0C4;
+    border-color: #3ED0C4;
+    color: #1E1A4D;
+    transform: translate(4px, -4px);
+}
+
+@media (max-width: 768px) {
+    .explore-section {
+        padding: 4rem 1.25rem;
+    }
+
+    .explore-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .explore-card {
+        min-height: 220px;
+    }
+
+    .explore-card:hover {
+        transform: none;
+    }
+
+    .explore-card:active {
+        transform: scale(0.98);
+    }
+}
+
+/*
+Trending Now: horizontal, native-scroll-snap carousel of real CMS items (courses,
+products, advice cards) — no fabricated stats. Populated by
+js/content-loader.js#renderTrending. Stays on the same Cloud background as the
+section above/below for one continuous light band.
+*/
+.trending-section {
+    background: #F6F5F1;
+    padding: 1rem 2rem 6rem;
+    position: relative;
+    z-index: 2;
+}
+
+.trending-carousel {
+    max-width: 1150px;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.trend-track {
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 0.5rem 0.25rem 1.25rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #069494 transparent;
+}
+
+.trend-track::-webkit-scrollbar {
+    height: 6px;
+}
+
+.trend-track::-webkit-scrollbar-thumb {
+    background: rgba(6, 148, 148, 0.35);
+    border-radius: 999vw;
+}
+
+.trend-card {
+    flex: 0 0 260px;
+    scroll-snap-align: start;
+    background: #fff;
+    border: 1px solid #E4E3EC;
+    border-radius: 18px;
+    overflow: hidden;
+    text-decoration: none;
+    color: #1E1A4D;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 25px rgba(30, 26, 77, 0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.trend-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 35px rgba(30, 26, 77, 0.14);
+    border-color: #069494;
+}
+
+.trend-image {
+    position: relative;
+    width: 100%;
+    height: 140px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1E1A4D, #3A34A0);
+}
+
+.trend-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.trend-icon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3ED0C4;
+}
+
+.trend-icon svg {
+    width: 42px;
+    height: 42px;
+    fill: currentColor;
+}
+
+.trend-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #069494;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999vw;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.trend-badge.new {
+    background: #3A34A0;
+}
+
+.trend-body {
+    padding: 1.1rem 1.15rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+}
+
+.trend-type {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #069494;
+}
+
+.trend-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1E1A4D;
+    line-height: 1.35;
+}
+
+.trend-meta {
+    font-size: 0.85rem;
+    color: #6b6e78;
+    margin-top: auto;
+}
+
+.trend-arrow-row {
+    display: flex;
+    justify-content: flex-end;
+    color: #069494;
+    transition: transform 0.25s ease;
+}
+
+.trend-card:hover .trend-arrow-row {
+    transform: translateX(4px);
+}
+
+.trend-nav {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #E4E3EC;
+    color: #1E1A4D;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(30, 26, 77, 0.1);
+    transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+.trend-nav svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+.trend-nav:hover {
+    background: #069494;
+    color: #fff;
+    border-color: #069494;
+}
+
+@media (max-width: 600px) {
+    .trending-section {
+        padding: 0.5rem 1.25rem 4rem;
+    }
+
+    .trend-card {
+        flex: 0 0 210px;
+    }
+
+    .trend-nav {
+        display: none;
+    }
+}
+
+/*
+How It Works: Discover -> Connect -> Grow, kept visually simple (no pinning or
+scrubbed ScrollTrigger work — just the same lightweight IntersectionObserver
+reveal used elsewhere) with a connecting line between the numbered steps.
+*/
+.how-section {
+    background: #F6F5F1;
+    padding: 1rem 2rem 6rem;
+    position: relative;
+    z-index: 2;
+}
+
+.how-steps {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    position: relative;
+}
+
+.how-steps::before {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: 12%;
+    right: 12%;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(6, 148, 148, 0.15), rgba(6, 148, 148, 0.5), rgba(6, 148, 148, 0.15));
+}
+
+.how-step {
+    position: relative;
+    flex: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.how-step-num {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #069494;
+    color: #069494;
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 8px 20px rgba(30, 26, 77, 0.1);
+}
+
+.how-step-icon {
+    font-size: 1.8rem;
+}
+
+.how-step h3 {
+    color: #1E1A4D;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.how-step p {
+    color: #33363F;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    max-width: 26ch;
+}
+
+@media (max-width: 768px) {
+    .how-section {
+        padding: 0.5rem 1.25rem 4rem;
+    }
+
+    .how-steps {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 2.5rem;
+    }
+
+    .how-steps::before {
+        top: 0;
+        bottom: 0;
+        left: 27px;
+        right: auto;
+        width: 2px;
+        height: auto;
+        background: linear-gradient(180deg, rgba(6, 148, 148, 0.15), rgba(6, 148, 148, 0.5), rgba(6, 148, 148, 0.15));
+    }
+
+    .how-step {
+        flex-direction: row;
+        text-align: left;
+        gap: 1.1rem;
+    }
+
+    .how-step-num {
+        flex-shrink: 0;
+        width: 56px;
+        height: 56px;
+    }
+
+    .how-step p {
+        max-width: none;
+    }
+}
+
+/*
+Final CTA: reuses the .hero-cta .cta-btn component as-is (see ~line 2384) so no
+new button styles are needed here — only the section wrapper.
+*/
+.final-cta {
+    background: #1E1A4D;
+    color: #fff;
     padding: 5rem 2rem;
     text-align: center;
     position: relative;
     z-index: 2;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    overflow: hidden;
 }
 
-.services-header {
-    margin-bottom: 4rem;
-    position: relative;
-    z-index: 10;
+.final-cta h2 {
+    background: linear-gradient(135deg, #ffffff 0%, #3ED0C4 50%, #069494 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 0.75rem;
+    font-size: clamp(2rem, 4vw, 2.75rem);
 }
 
-.services-header h2 {
-    font-size: clamp(2.5rem, 5vw, 3.5rem);
-    color: #1E1A4D;
-    margin: 0 0 1rem 0;
-    font-weight: 700;
-    letter-spacing: 2px;
+.final-cta .services-subtitle-dark {
+    max-width: 560px;
+    margin: 0 auto 1rem;
 }
 
-.services-subtitle {
-    font-size: clamp(1.1rem, 2vw, 1.3rem);
-    color: #33363F;
-    margin: 0;
-    font-weight: 300;
-}
-
-.services-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-    position: relative;
-    z-index: 10;
-}
-
-.service-card {
-    background: #fff;
-    border: 1px solid #E4E3EC;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(30, 26, 77, 0.08);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    position: relative;
-    cursor: pointer;
-    will-change: transform;
-}
-
-.service-image {
-    position: relative;
-    width: 100%;
-    height: 250px;
-    overflow: hidden;
-    border-radius: 20px 20px 0 0;
-}
-
-.service-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    will-change: transform;
-}
-
-.service-content {
-    padding: 2rem;
-    text-align: left;
-    position: relative;
-    z-index: 10;
-}
-
-.service-content h3 {
-    font-size: 1.8rem;
-    color: #1E1A4D;
-    margin: 0 0 1rem 0;
-    font-weight: 600;
-}
-
-.service-description {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: #33363F;
-    margin: 0 0 1.5rem 0;
-    opacity: 1;
-}
-
-.service-features {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.feature-tag {
-    background: rgba(6, 148, 148, 0.1);
-    color: #069494;
-    padding: 0.25rem 0.75rem;
-    border-radius: 15px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    border: 1px solid rgba(6, 148, 148, 0.25);
-}
-
-/* ========== SERVICE CARD GLASSMORPHISM BUTTON ========== */
-
-.service-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    text-decoration: none;
-    position: relative;
-    border-radius: 999vw;
-    background: transparent;
-    pointer-events: auto;
-    transition: all var(--anim--hover-time) var(--anim--hover-ease);
-}
-
-/* Button Wrap Container for Services */
-.service-content .service-link {
-    position: relative;
-    z-index: 2;
-}
-
-/* Service Button Shadow Container */
-.service-link::before {
-    content: "";
-    position: absolute;
-    width: calc(100% + 0.8em);
-    height: calc(100% + 0.8em);
-    top: calc(-0.4em);
-    left: calc(-0.4em);
-    filter: blur(clamp(3px, 0.15em, 12px));
-    -webkit-filter: blur(clamp(3px, 0.15em, 12px));
-    -moz-filter: blur(clamp(3px, 0.15em, 12px));
-    -ms-filter: blur(clamp(3px, 0.15em, 12px));
-    background: linear-gradient(180deg, rgba(58, 52, 160, 0.4), rgba(62, 208, 196, 0.25));
-    border-radius: 999vw;
-    pointer-events: none;
-    z-index: -1;
-    opacity: 0.8;
-    transition: all var(--anim--hover-time) var(--anim--hover-ease);
-}
-
-/* Service Button Base Styles */
-.service-link {
-    --border-width: clamp(1px, 0.0625em, 4px);
-    cursor: pointer;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    background: linear-gradient(-75deg,
-            rgba(62, 208, 196, 0.08),
-            rgba(62, 208, 196, 0.18),
-            rgba(6, 148, 148, 0.08));
-    border-radius: 999vw;
-    box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-        inset 0 -0.125em 0.125em rgba(62, 208, 196, 0.4),
-        0 0.25em 0.125em -0.125em rgba(0, 0, 0, 0.2),
-        0 0 0.1em 0.25em inset rgba(62, 208, 196, 0.2),
-        0 0 0 0 rgba(62, 208, 196, 1);
-    backdrop-filter: blur(clamp(1px, 0.125em, 4px));
-    -webkit-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
-    -moz-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
-    -ms-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
-    transition: all var(--anim--hover-time) var(--anim--hover-ease);
-    padding: 0.75em 1.5em;
-    color: #fff;
-    font-weight: 600;
-    font-size: 0.9rem;
-    border: 1px solid rgba(62, 208, 196, 0.2);
-}
-
-.service-link:hover {
-    transform: scale(0.975);
-    backdrop-filter: blur(0.01em);
-    -webkit-backdrop-filter: blur(0.01em);
-    -moz-backdrop-filter: blur(0.01em);
-    -ms-backdrop-filter: blur(0.01em);
-    box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-        inset 0 -0.125em 0.125em rgba(62, 208, 196, 0.6),
-        0 0.15em 0.05em -0.1em rgba(0, 0, 0, 0.25),
-        0 0 0.05em 0.1em inset rgba(62, 208, 196, 0.5),
-        0 0 0 0 rgba(62, 208, 196, 1);
-}
-
-/* Service Button Text Shine Effect */
-.service-link span {
-    position: relative;
-    display: block;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    font-family: inherit;
-    letter-spacing: -0.02em;
-    font-weight: 600;
-    color: #fff;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-shadow: 0em 0.15em 0.05em rgba(0, 0, 0, 0.1);
-    transition: all var(--anim--hover-time) var(--anim--hover-ease);
-}
-
-.service-link span::after {
-    content: "";
-    display: block;
-    position: absolute;
-    z-index: 1;
-    width: calc(100% + 6.5em);
-    height: calc(100% + 1.5em);
-    top: calc(-0.75em);
-    left: calc(-3.25em);
-    box-sizing: border-box;
-    border-radius: 999vw;
-    overflow: visible;
-    background: linear-gradient(var(--angle-2),
-            rgba(62, 208, 196, 0) 0%,
-            rgba(62, 208, 196, 0.6) 40% 50%,
-            rgba(62, 208, 196, 0) 55%);
-    z-index: 3;
-    mix-blend-mode: screen;
-    pointer-events: none;
-    background-size: 200% 200%;
-    background-position: 0% 50%;
-    background-repeat: no-repeat;
-    transition: background-position calc(var(--anim--hover-time) * 1.25) var(--anim--hover-ease),
-        --angle-2 calc(var(--anim--hover-time) * 1.25) var(--anim--hover-ease);
-}
-
-.service-link:hover span::after {
-    background-position: 25% 50%;
-}
-
-.service-link:active span::after {
-    background-position: 50% 15%;
-    --angle-2: -15deg;
-}
-
-/* Service Button Outline */
-.service-link::after {
-    content: "";
-    position: absolute;
-    z-index: 1;
-    inset: 0;
-    border-radius: 999vw;
-    width: calc(100% + var(--border-width));
-    height: calc(100% + var(--border-width));
-    top: calc(0% - var(--border-width) / 2);
-    left: calc(0% - var(--border-width) / 2);
-    padding: var(--border-width);
-    box-sizing: border-box;
-    background: conic-gradient(from var(--angle-1) at 50% 50%,
-            rgba(62, 208, 196, 0.4),
-            rgba(62, 208, 196, 0) 5% 40%,
-            rgba(58, 52, 160, 0.4) 50%,
-            rgba(58, 52, 160, 0) 60% 95%,
-            rgba(62, 208, 196, 0.4)),
-        linear-gradient(180deg, rgba(62, 208, 196, 0.5), rgba(62, 208, 196, 0.5));
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    transition: all var(--anim--hover-time) var(--anim--hover-ease),
-        --angle-1 500ms ease;
-    box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(62, 208, 196, 0.4);
-}
-
-.service-link:hover::after {
-    --angle-1: -125deg;
-}
-
-.service-link:active::after {
-    --angle-1: -75deg;
-}
-
-/* Shadow Hover Effect */
-.service-link:hover::before {
-    filter: blur(clamp(2px, 0.1em, 8px));
-    -webkit-filter: blur(clamp(2px, 0.1em, 8px));
-    -moz-filter: blur(clamp(2px, 0.1em, 8px));
-    -ms-filter: blur(clamp(2px, 0.1em, 8px));
-    opacity: 1;
-    background: linear-gradient(180deg, rgba(58, 52, 160, 0.6), rgba(62, 208, 196, 0.4));
-}
-
-/* SVG Icon Animation */
-.service-link svg {
-    transition: transform 0.3s ease;
-    z-index: 2;
-    position: relative;
-}
-
-.service-link:hover svg {
-    transform: translate(3px, -3px);
-}
-
-/* Touch Devices */
-@media (hover: none) and (pointer: coarse) {
-
-    .service-link span::after,
-    .service-link:active span::after {
-        --angle-2: -45deg;
-    }
-
-    .service-link::after,
-    .service-link:hover::after,
-    .service-link:active::after {
-        --angle-1: -75deg;
-    }
-}
-
-/* Service card hover effects */
-.service-card:hover {
-    transform: translateY(-8px);
-    box-shadow:
-        0 20px 40px rgba(30, 26, 77, 0.12),
-        0 0 0 1px rgba(6, 148, 148, 0.2);
-    border-color: rgba(6, 148, 148, 0.3);
-}
-
-.service-card:hover .service-image img {
-    transform: scale(1.05);
-}
-
-.service-card:hover .feature-tag {
-    background: rgba(6, 148, 148, 0.18);
-    border-color: rgba(6, 148, 148, 0.4);
-}
-
-/* Mobile responsive */
-/* Mobile Hero Section Optimizations */
-@media (max-width: 768px) {
-    .slide-content {
-        padding: 0 1.5rem;
-        padding-top: 80px;
-    }
-
-    .slide-content h1 {
-        font-size: clamp(2rem, 8vw, 3rem);
-        margin-bottom: 1rem;
-        line-height: 1.2;
-    }
-
-    .slide-content p {
-        font-size: clamp(1rem, 4vw, 1.2rem);
-        margin-bottom: 2rem;
-        max-width: 90%;
-    }
-
-    .slider-nav {
-        width: 44px;
-        height: 44px;
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .slider-nav svg {
-        width: 24px;
-        height: 24px;
-    }
-
-    .slide-indicators {
-        bottom: 60px;
-        gap: 8px;
-    }
-
-    .scroll-indicator {
-        bottom: 12px;
-    }
-
-    .indicator {
-        width: 10px;
-        height: 10px;
-        background: rgba(255, 255, 255, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.8);
-    }
-
-    .indicator.active {
-        background: rgba(255, 255, 255, 0.9);
-        transform: scale(1.3);
-    }
-
-    /* Touch-friendly navigation areas */
-    .slider-nav-area {
-        width: 25%;
-    }
-
-    .prev-area {
-        left: 0;
-    }
-
-    .next-area {
-        right: 0;
-    }
-
-    #services {
-        padding: 3rem 1rem;
-        min-height: auto;
-    }
-
-    .services-header {
-        margin-bottom: 3rem;
-    }
-
-    .services-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    .service-card {
-        max-width: 100%;
-    }
-
-    .service-image {
-        height: 200px;
-    }
-
-    .service-content {
-        padding: 1.5rem;
-    }
-
-    .service-content h3 {
-        font-size: 1.5rem;
-    }
-
-    .service-description {
-        font-size: 0.95rem;
-    }
-
-    .service-features {
-        margin-bottom: 1rem;
-    }
-
-    .feature-tag {
-        font-size: 0.8rem;
-        padding: 0.2rem 0.6rem;
-    }
-
-    .service-link {
-        padding: 0.8em 1.5em;
-        font-size: 0.9rem;
-        width: 100%;
-        justify-content: center;
-        margin-top: 0.5rem;
-    }
-
-    .service-link span {
-        font-size: 0.9rem;
-    }
-
-    /* Improve service card mobile interactions */
-    .service-card {
-        transform: none !important;
-        /* Disable hover transforms on mobile for better scrolling */
-        border-radius: 16px;
-    }
-
-    .service-card:active {
-        transform: scale(0.98) !important;
-        transition: transform 0.2s ease;
-    }
-
-    .service-image {
-        height: 180px;
-        border-radius: 16px 16px 0 0;
-    }
-
-    .service-content {
-        padding: 1.5rem 1.2rem;
-    }
-
-    .service-content h3 {
-        font-size: 1.4rem;
-        margin-bottom: 0.8rem;
-    }
-
-    .service-description {
-        font-size: 0.95rem;
-        line-height: 1.5;
-        margin-bottom: 1rem;
-    }
-
-    .service-features {
-        margin-bottom: 1.2rem;
-        gap: 0.4rem;
-    }
-
-    .feature-tag {
-        font-size: 0.8rem;
-        padding: 0.3rem 0.7rem;
-        border-radius: 12px;
-    }
-
-    /* Better mobile touch targets */
-    .service-card {
-        cursor: pointer;
-        -webkit-tap-highlight-color: rgba(6, 148, 148, 0.1);
-    }
+.final-cta .hero-cta {
+    display: inline-block;
+    margin-top: 1rem;
 }
 
 /*
 Showcase Sections: TD/Surgalt/Zuwluguu "taste" previews on the homepage,
 linking out to each sub-page. Cards are populated by js/content-loader.js.
-Light pink-to-white theme: Services starts the pink, the fade to white
-happens across the TD section, Surgalt/Zuwluguu stay white. Each section's
-content sits inside one big white .showcase-card (soft shadow) so it reads
-as a distinct panel against the pink/white page background.
+All three sections stay on the Cloud (#F6F5F1) background, continuing the
+light band started by the "What are you looking for?"/Trending/How It Works
+sections above. Each section's content sits inside one big white
+.showcase-card (soft shadow) so it reads as a distinct panel.
 */
 .showcase-section {
     padding: 5rem 2rem;
@@ -1034,12 +1149,12 @@ as a distinct panel against the pink/white page background.
 }
 
 #showcase-td {
-    background: linear-gradient(180deg, #FBE4EA 0%, #FFFFFF 100%);
+    background: #F6F5F1;
 }
 
 #showcase-surgalt,
 #showcase-zuwluguu {
-    background: #FFFFFF;
+    background: #F6F5F1;
 }
 
 .showcase-card {
@@ -1186,10 +1301,22 @@ About Section: layout with the interactive gradient background, glass cards, and
     position: relative;
     overflow: hidden;
     min-height: 100vh;
-    z-index: 3;
-    box-shadow:
-        0 10px 25px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    z-index: 1;
+}
+
+/* Recessed/sunken shade so the hero above and services below look like they
+   sit in front of this section (3D "tucked behind" illusion). Rendered as an
+   overlay (rather than a box-shadow) so it stays visible on top of the
+   animated gradient background instead of being covered by it. */
+.about-section::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    background:
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.55), transparent 180px),
+        linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent 180px);
 }
 
 /* Animated Background for About Section */
@@ -1294,6 +1421,22 @@ About Section: layout with the interactive gradient background, glass cards, and
     opacity: 0.7;
 }
 
+/* These 6 blobs each run their own infinite animation behind a heavy blur(40px)
+   filter - one of the more expensive things on the page to keep compositing.
+   Freeze them (and the mouse-follow bubble in main.js already stops itself
+   when this section is off-screen) for reduced-motion users. */
+@media (prefers-reduced-motion: reduce) {
+
+    .about-section .g1,
+    .about-section .g2,
+    .about-section .g3,
+    .about-section .g4,
+    .about-section .g5,
+    .about-section .interactive {
+        animation: none;
+    }
+}
+
 /* Content overlay for about section */
 .about-section .about-section-2-content {
     position: relative;
@@ -1326,14 +1469,17 @@ About Section: layout with the interactive gradient background, glass cards, and
 /* Frosted Glass Cards for about section */
 .about-section .glass-card {
     background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    /* backdrop-filter blur is one of the more GPU-expensive CSS properties -
+       trimmed from 20px, which reads almost identically but composites
+       cheaper on low-end devices. */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 2rem;
     position: relative;
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     cursor: pointer;
     box-shadow:
         0 15px 35px rgba(0, 0, 0, 0.3),
@@ -1644,8 +1790,11 @@ Portfolio Section: Infinite scroll and testimonial cards.
     min-width: 420px;
     height: 200px;
     background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
+    /* Up to 8 of these are in the DOM at once (originals + clones) inside a
+       continuously-animated marquee, so this blur radius is paid repeatedly
+       every frame - trimmed from 25px for a cheaper composite. */
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-radius: 24px;
     padding: 1.5rem;
     box-shadow:
@@ -1656,7 +1805,7 @@ Portfolio Section: Infinite scroll and testimonial cards.
     border: 1px solid rgba(255, 255, 255, 0.1);
     transform-origin: center center;
     will-change: transform;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;
     overflow: visible;
     cursor: pointer;
@@ -1703,7 +1852,7 @@ Portfolio Section: Infinite scroll and testimonial cards.
         margin-bottom: 0.8rem;
     }
 
-    .client-info h4 {
+    .client-info h3 {
         font-size: 1rem;
         /* Slightly bigger for mobile */
     }
@@ -1783,7 +1932,7 @@ Portfolio Section: Infinite scroll and testimonial cards.
     /* Very high z-index to ensure it's above everything */
     transform: scale(1.15);
     /* Make it bigger */
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .client-info {
@@ -1791,7 +1940,7 @@ Portfolio Section: Infinite scroll and testimonial cards.
     flex-direction: column;
 }
 
-.client-info h4 {
+.client-info h3 {
     margin: 0;
     color: var(--text-color, #fff);
     font-size: 1.1rem;
@@ -1843,15 +1992,54 @@ Portfolio Section: Infinite scroll and testimonial cards.
 Contact Section: Contact cards, form, and layout.
 */
 #contact {
-    background:
-        linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)),
-        url('../assets/images/handshake.jpg') center/cover no-repeat,
-        linear-gradient(135deg, #1E1A4D 0%, #1E1A4D 50%, #1E1A4D 100%);
+    background: linear-gradient(135deg, #1E1A4D 0%, #1E1A4D 60%, #3A34A0 100%);
     position: relative;
     overflow: hidden;
     padding: 5rem 2rem;
     z-index: 3;
     box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Brand mark backdrop: sits behind the glass card (#contact::before) and orb
+   accents (#contact::after) so it reads as a soft, frosted background element
+   rather than competing with the actual contact content on top. */
+.contact-brandmark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    opacity: 0.16;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.contact-brandmark-logo {
+    width: clamp(90px, 12vw, 180px);
+    height: clamp(90px, 12vw, 180px);
+    flex-shrink: 0;
+}
+
+.contact-brandmark-word {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 500;
+    font-size: clamp(2.5rem, 9vw, 6rem);
+    color: #fff;
+    letter-spacing: -0.01em;
+}
+
+.contact-brandmark-word .o {
+    font-weight: 800;
+    color: #3ED0C4;
+}
+
+@media (max-width: 600px) {
+    .contact-brandmark {
+        gap: 0.75rem;
+    }
 }
 
 /* Glass container behind contact content */
@@ -1864,11 +2052,14 @@ Contact Section: Contact cards, form, and layout.
     width: calc(100% - 3rem);
     max-width: 1300px;
     height: calc(100% - 6rem);
-    background: rgba(255, 255, 255, 0.03);
+    /* This pane covers almost the whole section, right in front of the brand
+       mark - lowered along with the cards below so the mark actually shows
+       through instead of being hidden under it. */
+    background: rgba(255, 255, 255, 0.015);
     background-image:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+        linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     border-radius: 32px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow:
@@ -2056,7 +2247,8 @@ Contact Section: Contact cards, form, and layout.
     width: 100%;
     height: 220px;
     padding: 2rem 1.5rem;
-    background: rgba(255, 255, 255, 0.08);
+    /* More transparent so the brand-mark background shows through - was 0.08 */
+    background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: 24px;
@@ -2065,7 +2257,7 @@ Contact Section: Contact cards, form, and layout.
     color: inherit;
     position: relative;
     transform: translateZ(0);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: transform, box-shadow;
     box-shadow:
         0 20px 50px rgba(0, 0, 0, 0.3),
@@ -2110,7 +2302,7 @@ Contact Section: Contact cards, form, and layout.
             transparent 70%);
     opacity: 0;
     transform: translateX(-100%) translateY(-100%) rotate(45deg);
-    transition: all 0.6s ease;
+    transition: opacity 0.6s ease, transform 0.6s ease;
     pointer-events: none;
 }
 
@@ -2133,7 +2325,8 @@ Contact Section: Contact cards, form, and layout.
         0 0 0 1px rgba(6, 148, 148, 0.4),
         0 0 30px rgba(6, 148, 148, 0.2);
     border-color: rgba(6, 148, 148, 0.4);
-    background: rgba(255, 255, 255, 0.18);
+    /* Was 0.18 - lowered to match the more transparent resting state */
+    background: rgba(255, 255, 255, 0.12);
 }
 
 .contact-card.small-card:hover::before {
@@ -2180,7 +2373,8 @@ Contact Section: Contact cards, form, and layout.
 /* Right side - Contact Form */
 .contact-form-container {
     width: 55%;
-    background: rgba(255, 255, 255, 0.06);
+    /* More transparent so the brand-mark background shows through - was 0.06 */
+    background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-radius: 24px;
@@ -2225,7 +2419,7 @@ Contact Section: Contact cards, form, and layout.
             transparent 70%);
     opacity: 0;
     transform: translateX(-100%) translateY(-100%) rotate(45deg);
-    transition: all 0.8s ease;
+    transition: opacity 0.8s ease, transform 0.8s ease;
     pointer-events: none;
     z-index: 2;
 }
@@ -2293,7 +2487,7 @@ Contact Section: Contact cards, form, and layout.
     color: #fff;
     font-family: inherit;
     font-size: 1rem;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: border-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     box-shadow:
         0 8px 20px rgba(0, 0, 0, 0.2),
         0 4px 10px rgba(0, 0, 0, 0.1),
@@ -2524,20 +2718,9 @@ Contact Section: Contact cards, form, and layout.
 }
 
 /*
-Footer: Simple centered footer.
-*/
-footer {
-    text-align: center;
-    padding: 1rem 0;
-    background: rgba(30, 26, 77, 0.9);
-    color: white;
-    font-size: 0.9rem;
-}
-
-/*
 Smooth Scrolling Wrapper: For smooth scroll libraries.
 */
-#smooth-wrapper {
+.home-main {
     overflow: hidden;
     width: 100%;
     height: 100%;
@@ -2568,7 +2751,7 @@ Menu Button Styles: For navigation buttons.
     overflow: hidden;
     letter-spacing: 2px;
     border-radius: 4px;
-    transition: all 0.15s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease, background 0.3s ease;
     text-decoration: none;
     color: white;
     height: 2.5rem;
@@ -2589,7 +2772,7 @@ Menu Button Styles: For navigation buttons.
     display: block;
     color: white;
     transform: translateY(0);
-    transition: transform 0.15s ease;
+    transition: transform 0.3s ease;
 }
 
 .button__hover {
@@ -2599,7 +2782,7 @@ Menu Button Styles: For navigation buttons.
     width: 100%;
     color: #000;
     transform: translateY(0);
-    transition: transform 0.15s ease;
+    transition: transform 0.3s ease;
 }
 
 /* Force hardware acceleration */
@@ -2641,7 +2824,7 @@ Menu Button Styles: For navigation buttons.
 Section: Responsive Design and Accessibility Media Queries
 */
 @media (max-width: 480px) {
-    .slide-content h1 {
+    .slide-content :is(h1, h2) {
         font-size: 2rem;
     }
 
@@ -2701,11 +2884,16 @@ Overlap Wave: Class to create proper overlap with wave transition
 */
 .overlap-wave {
     position: relative;
-    z-index: 4;
+    z-index: 1;
+    /* Slight overlap with the sections above/below so their edges cast
+       a shadow onto this section, reinforcing the recessed 3D look */
+    margin-top: -6px;
+    margin-bottom: -6px;
 }
 
 /* Comment Card Popup Modal */
 .comment-popup-overlay {
+    overscroll-behavior: contain;
     position: fixed;
     top: 0;
     left: 0;
@@ -2806,7 +2994,7 @@ Overlap Wave: Class to create proper overlap with wave transition
     cursor: pointer;
     font-size: 1.2rem;
     font-weight: bold;
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease;
 }
 
 .comment-popup-close:hover {
@@ -2889,7 +3077,7 @@ Overlap Wave: Class to create proper overlap with wave transition
     border-radius: 999vw;
     background: transparent;
     pointer-events: none;
-    transition: all var(--anim--hover-time) var(--anim--hover-ease);
+    transition: transform var(--anim--hover-time) var(--anim--hover-ease);
 }
 
 /* Button Shadow Container */
@@ -2924,17 +3112,20 @@ Overlap Wave: Class to create proper overlap with wave transition
     box-sizing: border-box;
     mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     mask-composite: exclude;
-    transition: all var(--anim--hover-time) var(--anim--hover-ease);
+    transition: top var(--anim--hover-time) var(--anim--hover-ease), opacity var(--anim--hover-time) var(--anim--hover-ease);
     overflow: visible;
     opacity: 1;
 }
 
 /* ========== HERO BUTTON BASE STYLES ========== */
 
-.hero-cta button {
+.hero-cta .cta-btn {
     /* Basic Styling */
     --border-width: clamp(1px, 0.0625em, 4px);
     all: unset;
+    /* `all: unset` leaves an <a> inline (unlike <button>, which still lays
+       out its content as one box), so the glass only wrapped part of it. */
+    display: inline-block;
     cursor: pointer;
     position: relative;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -2954,10 +3145,10 @@ Overlap Wave: Class to create proper overlap with wave transition
     -webkit-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
     -moz-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
     -ms-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
-    transition: all var(--anim--hover-time) var(--anim--hover-ease);
+    transition: transform var(--anim--hover-time) var(--anim--hover-ease), backdrop-filter var(--anim--hover-time) var(--anim--hover-ease), box-shadow var(--anim--hover-time) var(--anim--hover-ease);
 }
 
-.hero-cta button:hover {
+.hero-cta .cta-btn:hover {
     transform: scale(0.975);
     backdrop-filter: blur(0.01em);
     -webkit-backdrop-filter: blur(0.01em);
@@ -2971,7 +3162,7 @@ Overlap Wave: Class to create proper overlap with wave transition
 }
 
 /* Button Text */
-.hero-cta button span {
+.hero-cta .cta-btn span {
     position: relative;
     display: block;
     user-select: none;
@@ -2986,17 +3177,17 @@ Overlap Wave: Class to create proper overlap with wave transition
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-shadow: 0em 0.25em 0.05em rgba(0, 0, 0, 0.1);
-    transition: all var(--anim--hover-time) var(--anim--hover-ease);
+    transition: text-shadow var(--anim--hover-time) var(--anim--hover-ease);
     padding-inline: 1.5em;
     padding-block: 0.875em;
 }
 
-.hero-cta button:hover span {
+.hero-cta .cta-btn:hover span {
     text-shadow: 0.025em 0.025em 0.025em rgba(0, 0, 0, 0.12);
 }
 
 /* Text Shine Effect */
-.hero-cta button span::after {
+.hero-cta .cta-btn span::after {
     content: "";
     display: block;
     position: absolute;
@@ -3022,11 +3213,11 @@ Overlap Wave: Class to create proper overlap with wave transition
         --angle-2 calc(var(--anim--hover-time) * 1.25) var(--anim--hover-ease);
 }
 
-.hero-cta button:hover span::after {
+.hero-cta .cta-btn:hover span::after {
     background-position: 25% 50%;
 }
 
-.hero-cta button:active span::after {
+.hero-cta .cta-btn:active span::after {
     background-position: 50% 15%;
     --angle-2: -15deg;
 }
@@ -3034,8 +3225,8 @@ Overlap Wave: Class to create proper overlap with wave transition
 /* Touch Devices */
 @media (hover: none) and (pointer: coarse) {
 
-    .hero-cta button span::after,
-    .hero-cta button:active span::after {
+    .hero-cta .cta-btn span::after,
+    .hero-cta .cta-btn:active span::after {
         --angle-2: -45deg;
     }
 }
@@ -3043,7 +3234,7 @@ Overlap Wave: Class to create proper overlap with wave transition
 /* ========== HERO BUTTON OUTLINE ========== */
 
 /* Outline */
-.hero-cta button::after {
+.hero-cta .cta-btn::after {
     content: "";
     position: absolute;
     z-index: 1;
@@ -3064,30 +3255,30 @@ Overlap Wave: Class to create proper overlap with wave transition
         linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
     mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     mask-composite: exclude;
-    transition: all var(--anim--hover-time) var(--anim--hover-ease),
+    transition:
         --angle-1 500ms ease;
     box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(255, 255, 255, 0.5);
 }
 
-.hero-cta button:hover::after {
+.hero-cta .cta-btn:hover::after {
     --angle-1: -125deg;
 }
 
-.hero-cta button:active::after {
+.hero-cta .cta-btn:active::after {
     --angle-1: -75deg;
 }
 
 @media (hover: none) and (pointer: coarse) {
 
-    .hero-cta button::after,
-    .hero-cta button:hover::after,
-    .hero-cta button:active::after {
+    .hero-cta .cta-btn::after,
+    .hero-cta .cta-btn:hover::after,
+    .hero-cta .cta-btn:active::after {
         --angle-1: -75deg;
     }
 }
 
 /* Shadow Hover */
-.hero-cta .button-wrap:has(button:hover) .button-shadow {
+.hero-cta .button-wrap:has(.cta-btn:hover) .button-shadow {
     filter: blur(clamp(2px, 0.0625em, 6px));
     -webkit-filter: blur(clamp(2px, 0.0625em, 6px));
     -moz-filter: blur(clamp(2px, 0.0625em, 6px));
@@ -3095,17 +3286,17 @@ Overlap Wave: Class to create proper overlap with wave transition
     transition: filter var(--anim--hover-time) var(--anim--hover-ease);
 }
 
-.hero-cta .button-wrap:has(button:hover) .button-shadow::after {
+.hero-cta .button-wrap:has(.cta-btn:hover) .button-shadow::after {
     top: calc(var(--shadow-cuttoff-fix) - 0.875em);
     opacity: 1;
 }
 
 /* Press feedback (3D tilt removed for a calmer press effect) */
-.hero-cta .button-wrap:has(button:active) {
+.hero-cta .button-wrap:has(.cta-btn:active) {
     transform: scale(0.98);
 }
 
-.hero-cta .button-wrap:has(button:active) button {
+.hero-cta .button-wrap:has(.cta-btn:active) .cta-btn {
     box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
         inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
         0 0.125em 0.125em -0.125em rgba(0, 0, 0, 0.2),
@@ -3115,19 +3306,19 @@ Overlap Wave: Class to create proper overlap with wave transition
         inset 0 0.25em 0.05em 0 rgba(0, 0, 0, 0.15);
 }
 
-.hero-cta .button-wrap:has(button:active) .button-shadow {
+.hero-cta .button-wrap:has(.cta-btn:active) .button-shadow {
     filter: blur(clamp(2px, 0.125em, 12px));
     -webkit-filter: blur(clamp(2px, 0.125em, 12px));
     -moz-filter: blur(clamp(2px, 0.125em, 12px));
     -ms-filter: blur(clamp(2px, 0.125em, 12px));
 }
 
-.hero-cta .button-wrap:has(button:active) .button-shadow::after {
+.hero-cta .button-wrap:has(.cta-btn:active) .button-shadow::after {
     top: calc(var(--shadow-cuttoff-fix) - 0.5em);
     opacity: 0.75;
 }
 
-.hero-cta .button-wrap:has(button:active) span {
+.hero-cta .button-wrap:has(.cta-btn:active) span {
     text-shadow: 0.025em 0.25em 0.05em rgba(0, 0, 0, 0.12);
 }
 
@@ -3140,7 +3331,7 @@ Overlap Wave: Class to create proper overlap with wave transition
     border-radius: 999vw;
     background: transparent;
     pointer-events: none;
-    transition: all var(--anim--hover-time) var(--anim--hover-ease);
+    transition: transform var(--anim--hover-time) var(--anim--hover-ease);
     margin-top: 1rem;
     display: flex;
     justify-content: flex-end;
@@ -3180,7 +3371,7 @@ Overlap Wave: Class to create proper overlap with wave transition
     box-sizing: border-box;
     mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     mask-composite: exclude;
-    transition: all var(--anim--hover-time) var(--anim--hover-ease);
+    transition: top var(--anim--hover-time) var(--anim--hover-ease), opacity var(--anim--hover-time) var(--anim--hover-ease);
     overflow: hidden;
     opacity: 1;
 }
@@ -3210,7 +3401,7 @@ Overlap Wave: Class to create proper overlap with wave transition
     -webkit-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
     -moz-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
     -ms-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
-    transition: all var(--anim--hover-time) var(--anim--hover-ease);
+    transition: background var(--anim--hover-time) var(--anim--hover-ease), transform var(--anim--hover-time) var(--anim--hover-ease), backdrop-filter var(--anim--hover-time) var(--anim--hover-ease), box-shadow var(--anim--hover-time) var(--anim--hover-ease);
 }
 
 .contact-form-container button:hover {
@@ -3242,7 +3433,7 @@ Overlap Wave: Class to create proper overlap with wave transition
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-shadow: 0em 0.25em 0.05em rgba(0, 0, 0, 0.1);
-    transition: all var(--anim--hover-time) var(--anim--hover-ease);
+    transition: text-shadow var(--anim--hover-time) var(--anim--hover-ease);
     padding-inline: 1.5em;
     padding-block: 0.875em;
 }
@@ -3320,7 +3511,7 @@ Overlap Wave: Class to create proper overlap with wave transition
         linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
     mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     mask-composite: exclude;
-    transition: all var(--anim--hover-time) var(--anim--hover-ease),
+    transition:
         --angle-1 500ms ease;
     box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(255, 255, 255, 0.5);
 }
@@ -3445,163 +3636,5 @@ Overlap Wave: Class to create proper overlap with wave transition
 
     100% {
         transform: translateX(-50%) translateY(-10%);
-    }
-}
-
-/* Content overlay */
-.about-section-2-content {
-    position: relative;
-    z-index: 10;
-    width: 100%;
-    max-width: 1200px;
-    padding: 2rem;
-    text-align: center;
-}
-
-.about-section-2-content h2 {
-    font-size: clamp(2.5rem, 5vw, 3.5rem);
-    font-weight: 700;
-    margin-bottom: 3rem;
-    color: white;
-    opacity: 0.9;
-    user-select: none;
-    text-shadow: 1px 1px rgba(0, 0, 0, 0.2);
-}
-
-/* Glass Cards Container */
-.about-cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-    gap: 2rem;
-    margin-top: 3rem;
-}
-
-/* Frosted Glass Cards */
-.glass-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 2rem;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    cursor: pointer;
-    box-shadow:
-        0 15px 35px rgba(0, 0, 0, 0.3),
-        0 5px 15px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.glass-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.05) 100%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-}
-
-.glass-card:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow:
-        0 25px 60px rgba(0, 0, 0, 0.4),
-        0 10px 30px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        0 0 0 1px rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-.glass-card:hover::before {
-    opacity: 1;
-}
-
-.glass-card-inner {
-    text-align: left;
-    color: white;
-}
-
-.card-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    display: block;
-}
-
-.glass-card h3 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: white;
-}
-
-.glass-card p {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 1.5rem;
-}
-
-.card-highlights {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.highlight {
-    background: rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.9);
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .about-cards-container {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    .glass-card {
-        padding: 1.5rem;
-    }
-
-    .about-section-2-content {
-        padding: 1rem;
-    }
-
-    .about-section-2-content h2 {
-        margin-bottom: 2rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .about-cards-container {
-        grid-template-columns: 1fr;
-    }
-
-    .glass-card {
-        padding: 1rem;
-    }
-
-    .card-icon {
-        font-size: 2.5rem;
-    }
-
-    .glass-card h3 {
-        font-size: 1.3rem;
-    }
-
-    .glass-card p {
-        font-size: 0.9rem;
     }
 }

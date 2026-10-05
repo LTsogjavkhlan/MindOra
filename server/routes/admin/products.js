@@ -15,6 +15,7 @@ const router = createCrudRouter(Product, {
     itemKey: 'product',
     notFoundMessage: 'Бүтээгдэхүүн олдсонгүй.',
     uploadMiddleware: upload.array('images', 8),
+    imageUrls: (product) => (product.images || []).map((img) => img.url),
     async buildData(req) {
         const data = { ...req.body };
         if (data.features !== undefined) data.features = parseFeatures(data.features);

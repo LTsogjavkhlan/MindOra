@@ -3,24 +3,6 @@ body {
     padding-top: 0;
 }
 
-/* Skip Navigation Link */
-.skip-nav {
-    position: absolute;
-    top: -40px;
-    left: 8px;
-    background: #000;
-    color: white;
-    padding: 8px 16px;
-    text-decoration: none;
-    border-radius: 4px;
-    z-index: 9999;
-    transition: top 0.3s;
-}
-
-.skip-nav:focus {
-    top: 8px;
-}
-
 /* Screen reader only content */
 .sr-only {
     position: absolute !important;
@@ -191,7 +173,7 @@ body {
     font-weight: 600;
     font-size: 0.9rem;
     letter-spacing: 0.5px;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
     border: none;
     position: relative;
     overflow: hidden;
@@ -358,7 +340,7 @@ body {
     border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
     opacity: 0;
     transform: translateY(30px);
 }
@@ -453,7 +435,7 @@ body {
     display: inline-block;
     padding-bottom: 3px;
     border-bottom: 2px solid transparent;
-    transition: all 0.3s ease;
+    transition: border-bottom-color 0.3s ease;
 }
 
 .course-link:hover {
@@ -519,7 +501,7 @@ body {
     cursor: pointer;
     display: flex;
     align-items: center;
-    transition: all 0.3s ease;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .view-all-btn:hover {

@@ -43,9 +43,13 @@ Nodemailer needs an **App Password**, not your normal Gmail login password:
 ## 5. Set your admin login
 
 Edit `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `.env` to whatever you want to log into
-the `/admin` panel with. These are only used once, by the seed script below, to create
-your admin account — changing them afterward in `.env` does **not** change your login
-(you'd change your password from inside the admin panel instead).
+the `/admin` panel with. The seed script below uses them to create your admin account.
+Changing them in `.env` later does **not** change your login by itself. To change the
+password (or create the account without re-seeding), update `.env` and run:
+
+```
+npm run admin:password
+```
 
 ## 6. Check `.env`
 
@@ -55,12 +59,15 @@ By the end of steps 2-5, `.env` should have real values (not placeholders) for:
 `SESSION_SECRET` is already filled in for you. `.env` is gitignored, so none of this gets
 committed. `.env.example` documents the same variables without real values.
 
+If MongoDB fails to connect on Windows with an SRV/DNS lookup error, add
+`DNS_SERVERS=8.8.8.8,1.1.1.1` to `.env`.
+
 ## 7. Seed the database (one time)
 
 This copies the site's current content into MongoDB and creates your admin login:
 
 ```
-node server/seed.js
+npm run seed
 ```
 
 Safe to re-run later — it won't touch your admin account if one already exists, but it
@@ -79,3 +86,18 @@ calls the API under `/api/*`, which Vite proxies to `http://localhost:3001` in d
 - Public content API: `GET /api/content/:page` (`home`, `td`, `surgalt`, `zuwluguu`)
 - Admin panel: http://localhost:5173/admin.html — log in with `ADMIN_USERNAME`/`ADMIN_PASSWORD`
 - Contact form submissions land in the `contactsubmissions` MongoDB collection.
+
+Static files that are served as-is (images, fonts, the page scripts in `js/`) live in
+`public/` and are referenced with root paths like `/assets/images/hero1.jpg`.
+
+## 9. Production
+
+```
+npm run build
+npm start
+```
+
+`npm run build` writes the site to `dist/`, and `npm start` runs the Express server, which
+serves both `dist/` and the `/api` routes from one origin (http://localhost:3001 by default).
+On a host, also set `NODE_ENV=production` (HTTPS-only session cookies) and, if the host puts
+a proxy in front of the app (most do), `TRUST_PROXY=1`.

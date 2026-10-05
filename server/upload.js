@@ -33,4 +33,25 @@ function uploadImageBuffer(buffer) {
     });
 }
 
-module.exports = { upload, uploadImageBuffer };
+// .../<cloud>/image/upload/[transformations/][v123/]mindora/abc.jpg -> "mindora/abc"
+const UPLOADED_URL_REGEX = /\/image\/upload\/(?:.*?\/)?(mindora\/[^.]+)\.\w+$/;
+
+// Best-effort removal of images we uploaded that nothing references any more.
+// Ignores anything that isn't ours (e.g. the seeded /assets/images/... paths),
+// and never fails the request - a leftover file is better than a failed save.
+async function deleteUploadedImages(urls) {
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const publicIds = urls
+        .filter((url) => url && cloudName && url.includes(`res.cloudinary.com/${cloudName}/`))
+        .map((url) => (url.match(UPLOADED_URL_REGEX) || [])[1])
+        .filter(Boolean);
+    if (!publicIds.length) return;
+
+    try {
+        await cloudinary.api.delete_resources(publicIds);
+    } catch (error) {
+        console.error('Failed to delete unused Cloudinary images:', publicIds, error.message);
+    }
+}
+
+module.exports = { upload, uploadImageBuffer, deleteUploadedImages };

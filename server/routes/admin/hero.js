@@ -9,6 +9,7 @@ const router = createCrudRouter(HeroSlide, {
     filterFields: ['page'],
     sort: { page: 1, order: 1 },
     uploadMiddleware: upload.single('image'),
+    imageUrls: (slide) => [slide.imageUrl],
     async buildData(req) {
         const data = { ...req.body };
         if (req.file) data.imageUrl = await uploadImageBuffer(req.file.buffer);

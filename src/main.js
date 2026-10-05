@@ -1,5 +1,7 @@
-// Entry point for the project
-import './style.css';
+// Home page entry point (style.css is linked directly in index.html).
+
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DATE_FORMAT = new Intl.DateTimeFormat('mn-MN', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 
 // Wait for the CMS-driven hero content to finish rendering (js/content-loader.js)
 // before setting up the slider/animations, so they run against real content
@@ -16,10 +18,6 @@ document.addEventListener("content:rendered", () => {
         console.error('ScrollTrigger is not loaded! Please check if the ScrollTrigger script tag is properly included.');
         return;
     }
-
-    // GSAP and plugins are already registered via script tags
-    console.log('GSAP loaded successfully:', gsap.version);
-    console.log('ScrollTrigger loaded successfully');
 
     // Performance optimizations for GSAP
     gsap.ticker.lagSmoothing(0); // Disable lag smoothing
@@ -50,11 +48,9 @@ document.addEventListener("content:rendered", () => {
 
     // Comment popup functionality - Define before it's used
     function showCommentPopup(card) {
-        console.log('Card clicked:', card); // Debug log
-
         // Extract data from the card with error checking
         const image = card.querySelector('.client-image');
-        const nameElement = card.querySelector('.client-info h4');
+        const nameElement = card.querySelector('.client-info h3');
         const titleElement = card.querySelector('.client-info span');
         const commentElement = card.querySelector('.comment-content p');
 
@@ -66,11 +62,10 @@ document.addEventListener("content:rendered", () => {
         const name = nameElement.textContent;
         const title = titleElement.textContent;
         const comment = commentElement.textContent;
-        const date = card.dataset.date || 'No date available';
+        const date = card.dataset.date ? DATE_FORMAT.format(new Date(card.dataset.date)) : '';
         const imageSrc = image.src;
         const imageAlt = image.alt;
-
-        console.log('Creating popup with data:', { name, title, comment, date, imageSrc }); // Debug log
+        const opener = document.activeElement;
 
         // Create popup overlay if it doesn't exist
         let overlay = document.querySelector('.comment-popup-overlay');
@@ -78,29 +73,26 @@ document.addEventListener("content:rendered", () => {
             overlay = document.createElement('div');
             overlay.className = 'comment-popup-overlay';
             document.body.appendChild(overlay);
-            console.log('Created new overlay'); // Debug log
         }
 
         // Create popup HTML
         overlay.innerHTML = `
-            <div class="comment-popup">
-                <button class="comment-popup-close">&times;</button>
+            <div class="comment-popup" role="dialog" aria-modal="true" aria-labelledby="comment-popup-name">
+                <button class="comment-popup-close" type="button" aria-label="Хаах">&times;</button>
                 <div class="comment-popup-header">
-                    <img src="${imageSrc}" alt="${imageAlt}" class="comment-popup-image">
+                    <img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(imageAlt)}" class="comment-popup-image">
                     <div class="comment-popup-info">
-                        <h3>${name}</h3>
-                        <div class="title">${title}</div>
-                        <div class="date">${date}</div>
+                        <h3 id="comment-popup-name">${escapeHtml(name)}</h3>
+                        <div class="title">${escapeHtml(title)}</div>
+                        ${date ? `<div class="date"><time datetime="${escapeHtml(card.dataset.date)}">${escapeHtml(date)}</time></div>` : ''}
                     </div>
                 </div>
-                <div class="comment-popup-text">${comment}</div>
+                <div class="comment-popup-text">${escapeHtml(comment)}</div>
             </div>
         `;
 
         const popup = overlay.querySelector('.comment-popup');
         const closeBtn = overlay.querySelector('.comment-popup-close');
-
-        console.log('Popup elements created:', { overlay, popup, closeBtn }); // Debug log
 
         // Set initial state for animation
         gsap.set(overlay, {
@@ -130,10 +122,20 @@ document.addEventListener("content:rendered", () => {
                 ease: "back.out(1.2)"
             }, 0.1);
 
-        console.log('Popup should now be visible'); // Debug log
+        closeBtn.focus();
 
-        // Close handlers
+        // Close handlers - removed again on close so reopening doesn't stack them
+        const onOverlayClick = (e) => {
+            if (e.target === overlay) closePopup();
+        };
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') closePopup();
+        };
+
         const closePopup = () => {
+            overlay.removeEventListener('click', onOverlayClick);
+            document.removeEventListener('keydown', handleEsc);
+            opener?.focus();
             const closeTl = gsap.timeline();
             closeTl.to(popup, {
                 scale: 0.8,
@@ -153,19 +155,7 @@ document.addEventListener("content:rendered", () => {
         };
 
         closeBtn.addEventListener('click', closePopup);
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                closePopup();
-            }
-        });
-
-        // ESC key to close
-        const handleEsc = (e) => {
-            if (e.key === 'Escape') {
-                closePopup();
-                document.removeEventListener('keydown', handleEsc);
-            }
-        };
+        overlay.addEventListener('click', onOverlayClick);
         document.addEventListener('keydown', handleEsc);
     }
 
@@ -181,6 +171,8 @@ document.addEventListener("content:rendered", () => {
         lazyLoad();
         setupInfiniteScroll();
         initShowcaseAnimations();
+        initNewSectionAnimations();
+        initTrendingCarousel();
     }
 
     // Make sure ScrollTrigger is refreshed when window is fully loaded
@@ -190,11 +182,12 @@ document.addEventListener("content:rendered", () => {
     });
 
 
-    // Service Card Animations - Simplified for grid layout
+    // Explore Card Animations ("What are you looking for?" grid) - the cards
+    // are native <a> elements, so no click/keyboard shimming is needed here.
     function initServiceCardAnimations() {
-        const serviceCards = document.querySelectorAll('.service-card');
+        const exploreCards = document.querySelectorAll('.explore-card');
 
-        if (serviceCards.length === 0) {
+        if (exploreCards.length === 0) {
             return;
         }
 
@@ -208,8 +201,8 @@ document.addEventListener("content:rendered", () => {
             }
         });
 
-        // Animate service cards on scroll with stagger effect
-        serviceCards.forEach((card, index) => {
+        // Animate explore cards on scroll with stagger effect
+        exploreCards.forEach((card, index) => {
             tl.fromTo(card,
                 {
                     opacity: 0,
@@ -225,36 +218,6 @@ document.addEventListener("content:rendered", () => {
                 },
                 index * 0.2 // Stagger delay
             );
-        });
-
-        // Add click handlers for navigation
-        serviceCards.forEach((card) => {
-            const serviceLink = card.querySelector('.service-link');
-            if (serviceLink) {
-                // Add click event to entire card
-                card.addEventListener('click', (e) => {
-                    // Don't trigger if clicking on the link itself
-                    if (e.target.closest('.service-link')) {
-                        return;
-                    }
-
-                    // Trigger link click
-                    serviceLink.click();
-                });
-
-                // Add keyboard support
-                card.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        serviceLink.click();
-                    }
-                });
-
-                // Make card focusable
-                card.setAttribute('tabindex', '0');
-                card.setAttribute('role', 'button');
-                card.setAttribute('aria-label', `Navigate to ${card.dataset.service} page`);
-            }
         });
     }
 
@@ -273,7 +236,7 @@ document.addEventListener("content:rendered", () => {
                         await navigator.clipboard.writeText(phone);
 
                         // Simple feedback without GSAP animation
-                        copyIndicator.textContent = 'Number copied!';
+                        copyIndicator.textContent = 'Дугаар хуулагдлаа!';
                         copyIndicator.style.opacity = '1';
                         copyIndicator.style.transform = 'translateY(0)';
 
@@ -413,6 +376,52 @@ document.addEventListener("content:rendered", () => {
         sections.forEach((section) => observer.observe(section));
     }
 
+    // Reveal-on-scroll for the new homepage sections (same lightweight
+    // IntersectionObserver + stagger-fade pattern as initShowcaseAnimations).
+    function initNewSectionAnimations() {
+        const groups = [
+            { container: '.trending-carousel', items: '.trend-card' },
+            { container: '.how-steps', items: '.how-step' },
+        ];
+
+        groups.forEach(({ container, items }) => {
+            const el = document.querySelector(container);
+            if (!el) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) return;
+                    const cards = entry.target.querySelectorAll(items);
+                    gsap.fromTo(cards,
+                        { opacity: 0, y: 30 },
+                        { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: 'power2.out' }
+                    );
+                    observer.unobserve(entry.target);
+                });
+            }, { threshold: 0.15 });
+
+            observer.observe(el);
+        });
+    }
+
+    // Trending Now carousel: native scroll-snap track, JS only drives the
+    // optional prev/next arrow buttons (touch/trackpad swipe works natively).
+    function initTrendingCarousel() {
+        const track = document.getElementById('trend-track');
+        if (!track) return;
+
+        const prevBtn = document.querySelector('.trend-nav.prev');
+        const nextBtn = document.querySelector('.trend-nav.next');
+        const scrollByCard = (direction) => {
+            const card = track.querySelector('.trend-card');
+            const step = card ? card.getBoundingClientRect().width + 20 : 280;
+            track.scrollBy({ left: direction * step * 2, behavior: 'smooth' });
+        };
+
+        prevBtn?.addEventListener('click', () => scrollByCard(-1));
+        nextBtn?.addEventListener('click', () => scrollByCard(1));
+    }
+
     // About Section animated background and glass cards
     function initAboutAnimatedBackground() {
         const aboutSection = document.querySelector('#about');
@@ -428,12 +437,13 @@ document.addEventListener("content:rendered", () => {
             let curY = 0;
             let tgX = 0;
             let tgY = 0;
+            let rafId = null;
 
             function moveInteractiveBubble() {
                 curX += (tgX - curX) / 20;
                 curY += (tgY - curY) / 20;
                 interactiveBubble.style.transform = `translate(${Math.round(curX)}px, ${Math.round(curY)}px)`;
-                requestAnimationFrame(moveInteractiveBubble);
+                rafId = requestAnimationFrame(moveInteractiveBubble);
             }
 
             // Mouse move handler
@@ -443,38 +453,35 @@ document.addEventListener("content:rendered", () => {
                 tgY = event.clientY - rect.top;
             };
 
-            // Only add mouse movement when section is visible
+            // Only listen/animate while the section is on screen - otherwise this
+            // rAF loop would run forever (every frame, for the rest of the page's
+            // life) even after the user scrolls away, which is wasteful on any
+            // device and especially costly on low-end ones.
             let isListening = false;
+            const start = () => {
+                if (isListening) return;
+                aboutSection.addEventListener('mousemove', handleMouseMove);
+                isListening = true;
+                moveInteractiveBubble();
+            };
+            const stop = () => {
+                if (!isListening) return;
+                aboutSection.removeEventListener('mousemove', handleMouseMove);
+                isListening = false;
+                if (rafId !== null) {
+                    cancelAnimationFrame(rafId);
+                    rafId = null;
+                }
+            };
+
             ScrollTrigger.create({
                 trigger: aboutSection,
                 start: 'top bottom',
                 end: 'bottom top',
-                onEnter: () => {
-                    if (!isListening) {
-                        aboutSection.addEventListener('mousemove', handleMouseMove);
-                        isListening = true;
-                        moveInteractiveBubble();
-                    }
-                },
-                onLeave: () => {
-                    if (isListening) {
-                        aboutSection.removeEventListener('mousemove', handleMouseMove);
-                        isListening = false;
-                    }
-                },
-                onEnterBack: () => {
-                    if (!isListening) {
-                        aboutSection.addEventListener('mousemove', handleMouseMove);
-                        isListening = true;
-                        moveInteractiveBubble();
-                    }
-                },
-                onLeaveBack: () => {
-                    if (isListening) {
-                        aboutSection.removeEventListener('mousemove', handleMouseMove);
-                        isListening = false;
-                    }
-                }
+                onEnter: start,
+                onLeave: stop,
+                onEnterBack: start,
+                onLeaveBack: stop
             });
         }
 
@@ -574,16 +581,20 @@ document.addEventListener("content:rendered", () => {
             menuButtons[link.getAttribute('href')] = link;
         });
 
-        // Create ScrollTrigger for each section
-        sections.forEach(section => {
+        // Only create a ScrollTrigger for sections that actually have a matching
+        // nav link (about/services/contact) - the homepage has many more
+        // section ids than nav links (hero, trending, how-it-works, the three
+        // showcases, portfolio), and creating+tracking a ScrollTrigger for each
+        // of those on every scroll/resize for no visual effect is wasted work.
+        const trackedSections = Array.from(sections).filter((section) => menuButtons['#' + section.id]);
+
+        trackedSections.forEach(section => {
+            const button = menuButtons['#' + section.id];
             ScrollTrigger.create({
                 trigger: section,
                 start: 'top center',
                 end: 'bottom center',
                 onToggle: ({ isActive }) => {
-                    const button = menuButtons['#' + section.id];
-                    if (!button) return;
-
                     if (isActive) {
                         button.classList.add('active-section');
                         button.setAttribute('data-active', 'true');
@@ -591,8 +602,6 @@ document.addEventListener("content:rendered", () => {
                         button.classList.remove('active-section');
                         button.removeAttribute('data-active');
                     }
-
-                    // Let CSS handle the visual changes
                 }
             });
         });
@@ -639,7 +648,7 @@ document.addEventListener("content:rendered", () => {
         sliderContainer.addEventListener('touchstart', (e) => {
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
-            stopAutoplay(); // Stop autoplay when touching
+            setInteracting(true);
         }, { passive: true });
 
         sliderContainer.addEventListener('touchend', (e) => {
@@ -660,16 +669,42 @@ document.addEventListener("content:rendered", () => {
                 }
             }
 
-            // Restart autoplay after touch interaction
-            setTimeout(startAutoplay, 2000);
+            // Resume autoplay shortly after the touch interaction ends
+            setTimeout(() => setInteracting(false), 2000);
         }, { passive: true });
 
-        // Start autoplay
-        startAutoplay();
+        // Autoplay runs only when nobody is hovering, focusing or touching the
+        // slider, the user hasn't paused it, and reduced motion isn't requested.
+        const toggleBtn = sliderContainer.querySelector('.carousel-toggle');
+        let userPaused = REDUCED_MOTION;
+        let interacting = false;
 
-        // Stop autoplay on slider hover
-        sliderContainer.addEventListener('mouseenter', stopAutoplay);
-        sliderContainer.addEventListener('mouseleave', startAutoplay);
+        function syncAutoplay() {
+            if (userPaused || interacting) stopAutoplay();
+            else startAutoplay();
+            if (toggleBtn) {
+                toggleBtn.dataset.paused = String(userPaused);
+                toggleBtn.setAttribute('aria-label', userPaused ? 'Слайдыг үргэлжлүүлэх' : 'Слайдыг зогсоох');
+            }
+        }
+
+        function setInteracting(value) {
+            interacting = value;
+            syncAutoplay();
+        }
+
+        toggleBtn?.addEventListener('click', () => {
+            userPaused = !userPaused;
+            syncAutoplay();
+        });
+        sliderContainer.addEventListener('mouseenter', () => setInteracting(true));
+        sliderContainer.addEventListener('mouseleave', () => setInteracting(false));
+        sliderContainer.addEventListener('focusin', () => setInteracting(true));
+        sliderContainer.addEventListener('focusout', (e) => {
+            if (!sliderContainer.contains(e.relatedTarget)) setInteracting(false);
+        });
+
+        syncAutoplay();
 
         // Preload all images immediately for smoother transitions
         preloadAllImages();
@@ -774,7 +809,7 @@ document.addEventListener("content:rendered", () => {
 
         function resetAutoplay() {
             stopAutoplay();
-            startAutoplay();
+            syncAutoplay();
         }
 
         // Initial slide setup
@@ -830,10 +865,16 @@ document.addEventListener("content:rendered", () => {
         const cards = container.querySelectorAll('.comment-card');
         if (cards.length < 2) return;
 
-        // Clone cards for infinite scroll effect (limit to just a few for better performance)
+        // Clone cards for infinite scroll effect (limit to just a few for better performance).
+        // Clones are purely visual: hidden from screen readers, skipped by Tab,
+        // and stripped of ids so the originals' ids/aria references stay unique.
         const maxClones = Math.min(4, cards.length);
         for (let i = 0; i < maxClones; i++) {
             const clone = cards[i % cards.length].cloneNode(true);
+            clone.setAttribute('aria-hidden', 'true');
+            clone.setAttribute('tabindex', '-1');
+            clone.removeAttribute('aria-labelledby');
+            clone.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
             container.appendChild(clone);
         }
 
@@ -879,14 +920,18 @@ document.addEventListener("content:rendered", () => {
                 }
             });
 
-            // Add click handler for popup
+            // Open the popup on click, or Enter/Space for keyboard users
             card.addEventListener('click', (e) => {
                 e.stopPropagation();
                 showCommentPopup(card);
             });
+            card.addEventListener('keydown', (e) => {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                e.preventDefault();
+                showCommentPopup(card);
+            });
         });
 
-        // Create a more optimized animation
         const scrollTween = gsap.to(container, {
             x: `-50%`,
             duration: cards.length * 10, // Slightly slower for better visibility
@@ -895,15 +940,41 @@ document.addEventListener("content:rendered", () => {
             paused: true
         });
 
-        // Use a simpler scroll trigger that doesn't constantly update
+        // Plays only while the section is on screen, nobody is hovering or
+        // focusing a card, the user hasn't paused it, and reduced motion isn't
+        // requested (then it starts paused and the button can start it).
+        const toggleBtn = document.querySelector('.marquee-toggle');
+        let inView = false;
+        let interacting = false;
+        let userPaused = REDUCED_MOTION;
+
+        function syncMarquee() {
+            if (inView && !interacting && !userPaused) scrollTween.play();
+            else scrollTween.pause();
+            if (toggleBtn) {
+                toggleBtn.dataset.paused = String(userPaused);
+                toggleBtn.setAttribute('aria-label', userPaused ? 'Сэтгэгдлүүдийг гүйлгэх' : 'Сэтгэгдлүүдийг зогсоох');
+            }
+        }
+
+        toggleBtn?.addEventListener('click', () => {
+            userPaused = !userPaused;
+            syncMarquee();
+        });
+        container.addEventListener('mouseenter', () => { interacting = true; syncMarquee(); });
+        container.addEventListener('mouseleave', () => { interacting = false; syncMarquee(); });
+        container.addEventListener('focusin', () => { interacting = true; syncMarquee(); });
+        container.addEventListener('focusout', (e) => {
+            if (!container.contains(e.relatedTarget)) { interacting = false; syncMarquee(); }
+        });
+
         ScrollTrigger.create({
             trigger: "#portfolio",
             start: "top bottom",
             end: "bottom top",
-            once: false,
-            onEnter: () => scrollTween.play(),
-            onLeaveBack: () => scrollTween.pause()
+            onToggle: (self) => { inView = self.isActive; syncMarquee(); }
         });
+        syncMarquee();
     }
 });
 
