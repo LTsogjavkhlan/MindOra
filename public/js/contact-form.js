@@ -6,9 +6,6 @@ function initContactForm() {
     const form = document.getElementById('contact-form');
     if (!form) return;
 
-    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const PHONE_REGEX = /^\d{8}$/;
-
     const submitButton = form.querySelector('button[type="submit"]');
     const submitButtonLabel = submitButton ? submitButton.querySelector('span') : null;
     const originalButtonText = submitButtonLabel ? submitButtonLabel.textContent : (submitButton ? submitButton.textContent : '');
@@ -75,7 +72,7 @@ function initContactForm() {
         if (!email) {
             showFieldError('email', 'Имэйл хаягаа оруулна уу.');
             hasError = true;
-        } else if (!EMAIL_REGEX.test(email)) {
+        } else if (!isValidEmail(email)) {
             showFieldError('email', 'Зөв имэйл хаяг оруулна уу.');
             hasError = true;
         }
@@ -83,7 +80,7 @@ function initContactForm() {
             showFieldError('message', 'Мессежээ оруулна уу.');
             hasError = true;
         }
-        if (phone && !PHONE_REGEX.test(phone.replace(/[\s\-()]/g, ''))) {
+        if (phone && !isValidPhone(phone)) {
             showFieldError('phone', '8 оронтой зөв утасны дугаар оруулна уу.');
             hasError = true;
         }

@@ -12,6 +12,16 @@ Base Styles: Reset and global settings for all elements
     color-scheme: dark;
 }
 
+/* The `hidden` attribute must beat component display rules (display: flex etc.). */
+[hidden] {
+    display: none !important;
+}
+
+/* No page scrolling behind an open modal dialog (cart, course details). */
+html:has(dialog[open]) {
+    overflow: hidden;
+}
+
 @media (prefers-reduced-motion: no-preference) {
     html {
         scroll-behavior: smooth;

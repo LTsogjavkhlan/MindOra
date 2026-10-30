@@ -25,10 +25,6 @@ body {
     color: var(--primary-color) !important;
 }
 
-.cta-button {
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)) !important;
-}
-
 .section-title {
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)) !important;
     -webkit-background-clip: text !important;
@@ -71,7 +67,8 @@ h4 {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 0 2rem;
+    /* 7rem top clears the fixed menu; content centers in the space below it */
+    padding: 7rem 2rem 0;
     overflow: hidden;
     margin-top: 0;
     z-index: 1;
@@ -98,16 +95,6 @@ h4 {
     margin-bottom: 3rem;
     opacity: 0;
     transform: translateY(20px);
-}
-
-/* Scroll Indicator */
-.scroll-indicator {
-    position: absolute;
-    bottom: -100px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    /* Increased z-index to be above waves and content */
 }
 
 .mouse {
@@ -267,6 +254,9 @@ h4 {
     padding: 5rem 1rem 0;
     background-color: var(--dark-blue);
     margin-bottom: 0;
+    /* The image slides in from x: 50px (zuwluguu.js); until it does, that
+       offset would otherwise widen the page and allow sideways scrolling. */
+    overflow-x: clip;
 }
 
 .mentorship-content {
@@ -279,14 +269,22 @@ h4 {
     padding-bottom: 5rem;
 }
 
+/* min() so the 300px minimum never exceeds a narrow phone's width
+   (it pushed the whole page sideways below ~380px). */
 .mentorship-text {
     flex: 1;
-    min-width: 300px;
+    min-width: min(300px, 100%);
+}
+
+/* Shrink the glass button's wrapper to the button so its shadow doesn't
+   stretch across the column (same as .final-cta .hero-cta on the homepage). */
+.mentorship-text .hero-cta {
+    display: inline-block;
 }
 
 .mentorship-image {
     flex: 1;
-    min-width: 300px;
+    min-width: min(300px, 100%);
 }
 
 .image-placeholder {
@@ -315,24 +313,6 @@ h4 {
     left: 0;
     color: var(--accent-color);
     font-weight: bold;
-}
-
-.cta-button {
-    display: inline-block;
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-    color: var(--white);
-    padding: 0.8rem 2rem;
-    border-radius: 30px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: background 0.3s ease, transform 0.3s ease;
-    border: none;
-    cursor: pointer;
-}
-
-.cta-button:hover {
-    background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
-    transform: translateY(-3px);
 }
 
 /* Modal */
@@ -419,8 +399,10 @@ h4 {
         font-size: 1.2rem;
     }
 
-    .scroll-indicator {
-        bottom: 80px;
+    /* Sit closer to the bottom edge so it clears the text on short phones.
+       (Scoped to .hero-section to outrank style.css, which loads later.) */
+    .hero-section .scroll-indicator {
+        bottom: 16px;
     }
 
     .advice-card {

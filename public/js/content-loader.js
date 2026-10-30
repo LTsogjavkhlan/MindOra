@@ -104,7 +104,13 @@
                 </div>
                 <h3 id="cat${i}-title" class="category-title">${escapeHtml(cat.title)}</h3>
                 <p class="category-description">${escapeHtml(cat.description)}</p>
-                <a href="#${escapeHtml(cat.linkSectionId)}" class="category-link" aria-describedby="cat${i}-title">${escapeHtml(cat.linkText)}</a>
+                <!-- Same glass button as the homepage hero (styles in src/style.css) -->
+                <div class="hero-cta hero-cta--light">
+                    <div class="button-wrap">
+                        <a href="#${escapeHtml(cat.linkSectionId)}" class="cta-btn category-link" aria-describedby="cat${i}-title"><span>${escapeHtml(cat.linkText)}</span></a>
+                        <div class="button-shadow" aria-hidden="true"></div>
+                    </div>
+                </div>
             </div>
         `).join('');
     }
@@ -123,7 +129,7 @@
                     <div class="course-meta"><span class="course-category">${escapeHtml(course.categoryLabel)}</span></div>
                     <h3 class="course-title">${escapeHtml(course.title)}</h3>
                     <p class="course-description">${escapeHtml(course.description)}</p>
-                    <a href="${escapeHtml(safeUrl(course.linkHref))}" class="course-link">${escapeHtml(course.linkText)}</a>
+                    <button type="button" class="course-link" data-course="${escapeHtml(course._id)}" aria-haspopup="dialog">Дэлгэрэнгүй үзэх</button>
                 </div>
             </div>`;
     }
@@ -175,11 +181,13 @@
                     </div>
                     <div class="product-info">
                         <h3 class="product-title">${escapeHtml(p.title)}</h3>
-                        <div class="product-price">${escapeHtml(p.price)}</div>
+                        <div class="product-price">${formatPrice(p.price)}</div>
                         <div class="product-description">
                             <p>${escapeHtml(p.description)}</p>
                             <div class="product-features">${(p.features || []).map((f) => `<span class="feature">${escapeHtml(f)}</span>`).join('')}</div>
                         </div>
+                        <!-- Stock + add-to-cart: filled and kept current by js/shop.js -->
+                        <div class="product-buy" data-product-id="${escapeHtml(p._id)}"></div>
                     </div>
                 </div>`;
         }).join('');
@@ -218,7 +226,7 @@
                     </div>
                     <div class="teaser-info">
                         <h3 class="teaser-title">${escapeHtml(p.title)}</h3>
-                        <p class="teaser-price">${escapeHtml(p.price)}</p>
+                        <p class="teaser-price">${formatPrice(p.price)}</p>
                     </div>
                 </a>`;
         }).join('');
@@ -287,7 +295,7 @@
         }));
         const marketItems = products.slice(0, 3).map((p) => {
             const img = p.images && p.images[0];
-            return { typeLabel: 'Дэлгүүр', title: p.title, meta: p.price, imageUrl: img && img.url, imageAlt: img && img.alt, href: 'TD.html' };
+            return { typeLabel: 'Дэлгүүр', title: p.title, meta: formatPrice(p.price), imageUrl: img && img.url, imageAlt: img && img.alt, href: 'TD.html' };
         });
         const guidanceItems = adviceCards.slice(0, 2).map((a) => ({
             typeLabel: 'Зөвлөгөө', title: a.title, meta: '', iconSvgPath: a.iconSvgPath, href: 'zuwluguu.html',

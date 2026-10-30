@@ -86,6 +86,15 @@ calls the API under `/api/*`, which Vite proxies to `http://localhost:3001` in d
 - Public content API: `GET /api/content/:page` (`home`, `td`, `surgalt`, `zuwluguu`)
 - Admin panel: http://localhost:5173/admin.html — log in with `ADMIN_USERNAME`/`ADMIN_PASSWORD`
 - Contact form submissions land in the `contactsubmissions` MongoDB collection.
+- Shop orders (TD page cart → `POST /api/orders`) land in the `orders` collection and show up
+  in the admin panel's **Захиалга** tab. Each order emails you (`CONTACT_TO_EMAIL`) and sends
+  the customer a confirmation. Payment is cash on delivery.
+- Product stock is reserved when an order is placed and returned if you cancel the order.
+  Set each product's price and stock in the admin **TD** tab.
+- On the Surgalt page, "Дэлгэрэнгүй үзэх" opens a course details popup with an enrollment
+  form (`POST /api/enrollments`). Requests show up in the admin **Бүртгэл** tab and email
+  you and the student. Fill in each course's popup details (duration, schedule, start date,
+  level, format, instructor, what you'll learn, requirements) in the admin **Surgalt** tab.
 
 Static files that are served as-is (images, fonts, the page scripts in `js/`) live in
 `public/` and are referenced with root paths like `/assets/images/hero1.jpg`.

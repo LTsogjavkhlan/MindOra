@@ -485,3 +485,214 @@ input[type="file"] {
 #admin-status {
     margin: 1rem 1.5rem 0;
 }
+
+/* ---------------- Orders ---------------- */
+
+.tab-badge {
+    display: inline-block;
+    min-width: 1.4em;
+    margin-left: 0.3rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: #c0392b;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.inbox-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.inbox-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.75rem 0 1rem;
+}
+
+.filter-btn {
+    padding: 0.35rem 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    background: #fff;
+    color: #555;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.filter-btn:hover {
+    border-color: #069494;
+}
+
+.filter-btn.active {
+    background: #069494;
+    border-color: #069494;
+    color: #fff;
+}
+
+.inbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.inbox-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.inbox-card > summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 1rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    list-style: none;
+}
+
+.inbox-card > summary::-webkit-details-marker {
+    display: none;
+}
+
+.inbox-card[open] > summary {
+    border-bottom: 1px solid #eee;
+}
+
+.inbox-key {
+    max-width: 45%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.inbox-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.inbox-amount {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.inbox-date {
+    color: #777;
+    font-size: 0.85rem;
+}
+
+.status-badge {
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-new { background: #fdecec; color: #c0392b; }
+.status-confirmed { background: #fff4de; color: #9a6400; }
+.status-delivered { background: #e3f5f3; color: #04706f; }
+.status-cancelled { background: #eee; color: #666; }
+
+.inbox-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem 2rem;
+    padding: 1rem;
+}
+
+.order-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.order-items li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.order-items .order-items-total {
+    border-bottom: 0;
+    font-weight: 700;
+}
+
+.inbox-details {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.35rem 1rem;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.inbox-details dt {
+    color: #777;
+}
+
+.inbox-details dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.inbox-details a {
+    color: #069494;
+}
+
+.pre-wrap {
+    white-space: pre-wrap;
+}
+
+.inbox-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+    .inbox-body {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Stock level next to each product in the TD tab */
+.stock-tag {
+    display: inline-block;
+    margin-right: 0.4rem;
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    background: #e3f5f3;
+    color: #04706f;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.stock-tag.is-low { background: #fff4de; color: #9a6400; }
+.stock-tag.is-out { background: #fdecec; color: #c0392b; }
+
+.form-subheading {
+    margin: 1.5rem 0 0.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+    font-size: 1rem;
+}

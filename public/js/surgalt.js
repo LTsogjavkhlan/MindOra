@@ -91,10 +91,11 @@ function initCategoryAnimations() {
             // Keyboard support
             card.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
-                    const link = card.querySelector('a');
-                    if (link) {
+                    // Ignore keys pressed on the button itself (it handles its own).
+                    const button = card.querySelector('.course-link');
+                    if (button && e.target !== button) {
                         e.preventDefault();
-                        link.click();
+                        button.click();
                     }
                 }
             });

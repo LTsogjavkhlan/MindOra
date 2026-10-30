@@ -8,11 +8,15 @@ const { connectDB } = require('./db.js');
 const contactRouter = require('./routes/contact.js');
 const authRouter = require('./routes/auth.js');
 const contentRouter = require('./routes/content.js');
+const ordersRouter = require('./routes/orders.js');
+const enrollmentsRouter = require('./routes/enrollments.js');
 const adminHeroRouter = require('./routes/admin/hero.js');
 const adminCategoriesRouter = require('./routes/admin/categories.js');
 const adminCoursesRouter = require('./routes/admin/courses.js');
 const adminProductsRouter = require('./routes/admin/products.js');
 const adminAdviceCardsRouter = require('./routes/admin/adviceCards.js');
+const adminOrdersRouter = require('./routes/admin/orders.js');
+const adminEnrollmentsRouter = require('./routes/admin/enrollments.js');
 const requireAuth = require('./middleware/requireAuth.js');
 
 if (!process.env.SESSION_SECRET) {
@@ -45,11 +49,15 @@ app.use(session({
 app.use('/api/contact', contactRouter);
 app.use('/api/admin', authRouter);
 app.use('/api/content', contentRouter);
+app.use('/api/orders', ordersRouter);
+app.use('/api/enrollments', enrollmentsRouter);
 app.use('/api/admin/hero', requireAuth, adminHeroRouter);
 app.use('/api/admin/categories', requireAuth, adminCategoriesRouter);
 app.use('/api/admin/courses', requireAuth, adminCoursesRouter);
 app.use('/api/admin/products', requireAuth, adminProductsRouter);
 app.use('/api/admin/advice-cards', requireAuth, adminAdviceCardsRouter);
+app.use('/api/admin/orders', requireAuth, adminOrdersRouter);
+app.use('/api/admin/enrollments', requireAuth, adminEnrollmentsRouter);
 app.use('/api', (req, res) => res.status(404).json({ success: false, message: 'Not found.' }));
 
 // The built site (`npm run build` -> dist/). In development Vite serves the

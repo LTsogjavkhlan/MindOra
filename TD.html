@@ -166,11 +166,82 @@
         <!-- Product Grid Section -->
         <section class="list-section" id="list-view" aria-label="All products grid view">
             <h2 class="sr-only">Бүрэн Бүтээгдэхүүний Цуглуулга</h2>
-            <div class="products-grid" role="grid">
+            <div class="products-grid">
                 <!-- Populated dynamically by js/content-loader.js from MongoDB -->
             </div>
         </section>
     </main>
+
+    <!-- Shopping cart (js/shop.js). Shown once something is in the cart. -->
+    <button class="cart-toggle" type="button" aria-haspopup="dialog" aria-controls="cart-dialog" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM5.2 4l.4 2H20a1 1 0 0 1 1 1.2l-1.5 7A2 2 0 0 1 17.5 16H8.1a2 2 0 0 1-2-1.6L3.4 2H1V0h3.2a1 1 0 0 1 1 .8L5.2 4z"/></svg>
+        <span class="cart-toggle-label">Сагс</span>
+        <span class="cart-count" aria-hidden="true">0</span>
+    </button>
+    <p class="sr-only" id="cart-announcer" aria-live="polite"></p>
+
+    <dialog class="cart-dialog" id="cart-dialog" aria-labelledby="cart-title">
+        <div class="cart-panel">
+            <header class="cart-header">
+                <h2 id="cart-title">Таны сагс</h2>
+                <button class="cart-close" type="button" aria-label="Хаах">&times;</button>
+            </header>
+
+            <div class="cart-body">
+                <ul class="cart-items"></ul>
+                <p class="cart-empty" hidden>Сагс хоосон байна.</p>
+                <p class="cart-notice" role="alert" hidden></p>
+
+                <form class="checkout-form" id="cart-checkout" novalidate>
+                    <h3 class="checkout-title">Хүргэлтийн мэдээлэл</h3>
+                    <div class="checkout-field">
+                        <label for="checkout-name">Нэр *</label>
+                        <input id="checkout-name" name="name" type="text" autocomplete="name" required maxlength="100" aria-describedby="checkout-name-error">
+                        <span class="field-error" id="checkout-name-error"></span>
+                    </div>
+                    <div class="checkout-field">
+                        <label for="checkout-phone">Утас *</label>
+                        <input id="checkout-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required maxlength="30" placeholder="9911 2233" aria-describedby="checkout-phone-error">
+                        <span class="field-error" id="checkout-phone-error"></span>
+                    </div>
+                    <div class="checkout-field">
+                        <label for="checkout-email">Имэйл *</label>
+                        <input id="checkout-email" name="email" type="email" autocomplete="email" spellcheck="false" required maxlength="200" aria-describedby="checkout-email-error">
+                        <span class="field-error" id="checkout-email-error"></span>
+                    </div>
+                    <div class="checkout-field">
+                        <label for="checkout-address">Хүргэх хаяг *</label>
+                        <textarea id="checkout-address" name="address" autocomplete="street-address" required maxlength="500" rows="3" placeholder="Дүүрэг, хороо, байр, орц, тоот…" aria-describedby="checkout-address-error"></textarea>
+                        <span class="field-error" id="checkout-address-error"></span>
+                    </div>
+                    <div class="checkout-field">
+                        <label for="checkout-note">Нэмэлт тэмдэглэл</label>
+                        <textarea id="checkout-note" name="note" maxlength="500" rows="2" placeholder="Хүргэлтийн цаг, орцны код…"></textarea>
+                    </div>
+                    <!-- Honeypot: hidden from people, often filled in by bots -->
+                    <div class="hp-field" aria-hidden="true">
+                        <label for="checkout-website">Website</label>
+                        <input id="checkout-website" name="website" type="text" tabindex="-1" autocomplete="off">
+                    </div>
+                    <p class="checkout-payment">Төлбөр: хүргэлтээр бэлнээр төлнө.</p>
+                </form>
+            </div>
+
+            <footer class="cart-footer">
+                <div class="cart-total"><span>Нийт</span><strong class="cart-total-amount">0₮</strong></div>
+                <button class="checkout-submit" type="submit" form="cart-checkout" disabled>Захиалга өгөх</button>
+            </footer>
+
+            <!-- Shown instead of the cart after a successful order -->
+            <div class="order-confirmation" hidden>
+                <div class="confirmation-icon" aria-hidden="true">✓</div>
+                <h2 class="confirmation-title" tabindex="-1"></h2>
+                <p class="confirmation-text"></p>
+                <p class="checkout-payment">Төлбөр: хүргэлтээр бэлнээр төлнө.</p>
+                <button type="button" class="checkout-submit confirmation-close">Дэлгүүр рүү буцах</button>
+            </div>
+        </div>
+    </dialog>
 
     <!-- Contact Section -->
     <section id="contact" class="full-screen section">
@@ -291,6 +362,7 @@
     <script src="/js/html-utils.js"></script>
     <script src="/js/content-loader.js"></script>
     <script src="/js/TD.js"></script>
+    <script src="/js/shop.js"></script>
     <!-- Image Gallery Modal -->
     <div class="gallery-modal" id="galleryModal" role="dialog" aria-modal="true" aria-labelledby="gallery-title"
         aria-hidden="true">

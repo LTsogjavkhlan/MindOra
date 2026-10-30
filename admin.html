@@ -71,15 +71,49 @@
         <p id="admin-status" class="alert alert-error" role="alert" hidden></p>
 
         <nav class="admin-tabs">
-            <button class="tab-btn active" data-tab="home" type="button">Нүүр</button>
+            <button class="tab-btn active" data-tab="orders" type="button">Захиалга <span class="tab-badge" id="orders-new-count" hidden></span></button>
+            <button class="tab-btn" data-tab="enrollments" type="button">Бүртгэл <span class="tab-badge" id="enrollments-new-count" hidden></span></button>
+            <button class="tab-btn" data-tab="home" type="button">Нүүр</button>
             <button class="tab-btn" data-tab="td" type="button">TD</button>
             <button class="tab-btn" data-tab="surgalt" type="button">Surgalt</button>
             <button class="tab-btn" data-tab="zuwluguu" type="button">Zuwluguu</button>
         </nav>
 
         <main class="admin-content">
+            <!-- Orders -->
+            <section id="tab-orders" class="tab-panel active" data-inbox="orders">
+                <div class="inbox-header">
+                    <h2>Захиалга</h2>
+                    <button class="btn-secondary btn-small inbox-refresh" type="button">Шинэчлэх</button>
+                </div>
+                <div class="inbox-filters" role="group" aria-label="Төлөвөөр шүүх">
+                    <button class="filter-btn active" data-status="" type="button" aria-pressed="true">Бүгд</button>
+                    <button class="filter-btn" data-status="new" type="button" aria-pressed="false">Шинэ</button>
+                    <button class="filter-btn" data-status="confirmed" type="button" aria-pressed="false">Баталгаажсан</button>
+                    <button class="filter-btn" data-status="delivered" type="button" aria-pressed="false">Хүргэгдсэн</button>
+                    <button class="filter-btn" data-status="cancelled" type="button" aria-pressed="false">Цуцлагдсан</button>
+                </div>
+                <div class="inbox-list" aria-live="polite"></div>
+            </section>
+
+            <!-- Course enrollment requests -->
+            <section id="tab-enrollments" class="tab-panel" data-inbox="enrollments">
+                <div class="inbox-header">
+                    <h2>Сургалтын бүртгэл</h2>
+                    <button class="btn-secondary btn-small inbox-refresh" type="button">Шинэчлэх</button>
+                </div>
+                <div class="inbox-filters" role="group" aria-label="Төлөвөөр шүүх">
+                    <button class="filter-btn active" data-status="" type="button" aria-pressed="true">Бүгд</button>
+                    <button class="filter-btn" data-status="new" type="button" aria-pressed="false">Шинэ</button>
+                    <button class="filter-btn" data-status="contacted" type="button" aria-pressed="false">Холбогдсон</button>
+                    <button class="filter-btn" data-status="enrolled" type="button" aria-pressed="false">Бүртгэгдсэн</button>
+                    <button class="filter-btn" data-status="cancelled" type="button" aria-pressed="false">Цуцлагдсан</button>
+                </div>
+                <div class="inbox-list" aria-live="polite"></div>
+            </section>
+
             <!-- Home -->
-            <section id="tab-home" class="tab-panel active">
+            <section id="tab-home" class="tab-panel">
                 <h2>Үндсэн Слайдууд</h2>
                 <p class="section-hint">Эдгээр нь нүүр хуудсан дээрх 4 эргэлддэг слайд юм.</p>
                 <div id="home-hero-list" class="item-list"></div>

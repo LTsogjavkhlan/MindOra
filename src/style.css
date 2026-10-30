@@ -519,11 +519,11 @@ Slide Indicators: Dots for slider navigation.
     transform: scale(1.2);
 }
 
-/* Pause/play toggle for the auto-advancing hero slider and testimonial marquee. */
+/* Pause/play toggle for the auto-scrolling testimonial marquee. */
 .carousel-toggle {
     position: absolute;
+    top: 0;
     right: 24px;
-    bottom: 110px;
     z-index: 10;
     display: grid;
     place-items: center;
@@ -555,11 +555,6 @@ Slide Indicators: Dots for slider navigation.
 
 .carousel-toggle[data-paused="true"] .icon-play {
     display: block;
-}
-
-.marquee-toggle {
-    top: 0;
-    bottom: auto;
 }
 
 /*
@@ -3184,6 +3179,14 @@ Overlap Wave: Class to create proper overlap with wave transition
 
 .hero-cta .cta-btn:hover span {
     text-shadow: 0.025em 0.025em 0.025em rgba(0, 0, 0, 0.12);
+}
+
+/* Variant for dark backgrounds: the default black label is made for photos
+   and is unreadable on navy/purple (~2.5:1 contrast vs ~8:1 for white). */
+.hero-cta--light .cta-btn span,
+.hero-cta--light .cta-btn:hover span {
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 /* Text Shine Effect */

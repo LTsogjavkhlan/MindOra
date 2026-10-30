@@ -1,7 +1,6 @@
 // Home page entry point (style.css is linked directly in index.html).
 
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const DATE_FORMAT = new Intl.DateTimeFormat('mn-MN', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 
 // Wait for the CMS-driven hero content to finish rendering (js/content-loader.js)
 // before setting up the slider/animations, so they run against real content
@@ -62,7 +61,8 @@ document.addEventListener("content:rendered", () => {
         const name = nameElement.textContent;
         const title = titleElement.textContent;
         const comment = commentElement.textContent;
-        const date = card.dataset.date ? DATE_FORMAT.format(new Date(card.dataset.date)) : '';
+        // Date-only ISO strings parse as UTC midnight, so read them back in UTC.
+        const date = card.dataset.date ? formatDate(card.dataset.date, { utc: true }) : '';
         const imageSrc = image.src;
         const imageAlt = image.alt;
         const opener = document.activeElement;
@@ -674,18 +674,12 @@ document.addEventListener("content:rendered", () => {
         }, { passive: true });
 
         // Autoplay runs only when nobody is hovering, focusing or touching the
-        // slider, the user hasn't paused it, and reduced motion isn't requested.
-        const toggleBtn = sliderContainer.querySelector('.carousel-toggle');
-        let userPaused = REDUCED_MOTION;
+        // slider, and never when reduced motion is requested (arrows/dots still work).
         let interacting = false;
 
         function syncAutoplay() {
-            if (userPaused || interacting) stopAutoplay();
+            if (REDUCED_MOTION || interacting) stopAutoplay();
             else startAutoplay();
-            if (toggleBtn) {
-                toggleBtn.dataset.paused = String(userPaused);
-                toggleBtn.setAttribute('aria-label', userPaused ? 'Слайдыг үргэлжлүүлэх' : 'Слайдыг зогсоох');
-            }
         }
 
         function setInteracting(value) {
@@ -693,10 +687,6 @@ document.addEventListener("content:rendered", () => {
             syncAutoplay();
         }
 
-        toggleBtn?.addEventListener('click', () => {
-            userPaused = !userPaused;
-            syncAutoplay();
-        });
         sliderContainer.addEventListener('mouseenter', () => setInteracting(true));
         sliderContainer.addEventListener('mouseleave', () => setInteracting(false));
         sliderContainer.addEventListener('focusin', () => setInteracting(true));

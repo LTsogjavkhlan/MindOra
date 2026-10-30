@@ -3,11 +3,9 @@ const ContactSubmission = require('../models/ContactSubmission.js');
 const { sendContactMail } = require('../mailer.js');
 const asyncHandler = require('../asyncHandler.js');
 const createRateLimiter = require('../rateLimit.js');
+const { EMAIL_REGEX, PHONE_REGEX, normalizePhone } = require('../validation.js');
 
 const router = Router();
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_REGEX = /^\d{8}$/;
 
 const contactRateLimit = createRateLimiter({
     windowMs: 10 * 60 * 1000,
@@ -26,7 +24,7 @@ router.post('/', contactRateLimit, asyncHandler(async (req, res) => {
         return res.status(400).json({ success: false, message: 'Зөв имэйл хаяг оруулна уу.' });
     }
 
-    if (phone && !PHONE_REGEX.test(String(phone).replace(/[\s\-()]/g, ''))) {
+    if (phone && !PHONE_REGEX.test(normalizePhone(phone))) {
         return res.status(400).json({ success: false, message: '8 оронтой зөв утасны дугаар оруулна уу.' });
     }
 

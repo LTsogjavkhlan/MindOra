@@ -192,10 +192,14 @@
             document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+            if (btn.dataset.tab === 'orders') loadOrders();
+            if (btn.dataset.tab === 'enrollments') loadEnrollments();
         });
     });
 
     function loadAllContent() {
+        loadOrders();
+        loadEnrollments();
         loadHomeHero();
         loadSimpleHero('td', 'td-hero-form-container');
         loadSimpleHero('surgalt', 'surgalt-hero-form-container');
@@ -364,8 +368,171 @@
     }
 
     // ==================================================
+    // Inboxes (Orders, Enrollments)
+    // ==================================================
+
+    // Shared behaviour for a tab that lists incoming requests: status filter
+    // buttons, a "new" count badge, refresh, expandable rows and status buttons.
+    // The panel markup (admin.html) carries data-inbox="<name>".
+    function createInbox({ name, url, responseKey, statusLabels, actionsFor, itemHtml, emptyText, confirmFor = () => '', afterStatusChange }) {
+        const panel = document.querySelector(`[data-inbox="${name}"]`);
+        const list = panel.querySelector('.inbox-list');
+        const badge = document.getElementById(`${name}-new-count`);
+        let filter = '';
+
+        const statusBadge = (status) => `<span class="status-badge status-${status}">${statusLabels[status]}</span>`;
+        const actionsHtml = (item) => {
+            const buttons = actionsFor(item.status).map(([status, label, cls]) =>
+                `<button type="button" class="${cls} btn-small" data-id="${item._id}" data-status="${status}">${label}</button>`).join('');
+            return buttons ? `<div class="inbox-actions">${buttons}</div>` : '';
+        };
+
+        async function load() {
+            try {
+                const data = await apiFetch(url + (filter ? `?status=${filter}` : ''));
+                const items = data[responseKey];
+                badge.textContent = data.counts.new;
+                badge.hidden = !data.counts.new;
+                list.innerHTML = items.length
+                    ? items.map((item) => itemHtml(item, { statusBadge, actionsHtml })).join('')
+                    : `<p class="empty-state">${emptyText}</p>`;
+            } catch (err) {
+                list.innerHTML = `<p class="error-text" role="alert">Ачаалж чадсангүй: ${escapeHtml(err.message)}</p>`;
+            }
+        }
+
+        panel.querySelector('.inbox-refresh').addEventListener('click', load);
+
+        panel.querySelectorAll('.filter-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                panel.querySelectorAll('.filter-btn').forEach((b) => {
+                    b.classList.toggle('active', b === btn);
+                    b.setAttribute('aria-pressed', String(b === btn));
+                });
+                filter = btn.dataset.status;
+                load();
+            });
+        });
+
+        // One delegated handler for every row's status buttons.
+        list.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.inbox-actions button[data-status]');
+            if (!btn) return;
+            const { id, status } = btn.dataset;
+            const question = confirmFor(status);
+            if (question && !confirm(question)) return;
+
+            btn.disabled = true;
+            hideAlert(adminStatus);
+            try {
+                await apiFetch(`${url}/${id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status }),
+                });
+                await load();
+                afterStatusChange?.(status);
+            } catch (err) {
+                btn.disabled = false;
+                showAlert(adminStatus, `Төлөв өөрчилж чадсангүй: ${err.message}`);
+            }
+        });
+
+        return { load };
+    }
+
+    const contactRows = (p) => `
+        <dt>Утас</dt><dd><a href="tel:${escapeHtml(p.phone)}">${escapeHtml(p.phone)}</a></dd>
+        <dt>Имэйл</dt><dd><a href="mailto:${escapeHtml(p.email)}">${escapeHtml(p.email)}</a></dd>`;
+
+    const summaryDate = (date) =>
+        `<time class="inbox-date" datetime="${escapeHtml(date)}">${formatDate(date, { time: true })}</time>`;
+
+    // Mirrors server/orders.js TRANSITIONS (the server enforces it; this just hides impossible buttons).
+    const ORDER_ACTIONS = {
+        new: [['confirmed', 'Баталгаажуулах', 'btn-primary'], ['delivered', 'Хүргэгдсэн', 'btn-secondary'], ['cancelled', 'Цуцлах', 'btn-danger']],
+        confirmed: [['delivered', 'Хүргэгдсэн', 'btn-primary'], ['cancelled', 'Цуцлах', 'btn-danger']],
+        delivered: [],
+        cancelled: [],
+    };
+
+    const ordersInbox = createInbox({
+        name: 'orders',
+        url: '/api/admin/orders',
+        responseKey: 'orders',
+        statusLabels: { new: 'Шинэ', confirmed: 'Баталгаажсан', delivered: 'Хүргэгдсэн', cancelled: 'Цуцлагдсан' },
+        actionsFor: (status) => ORDER_ACTIONS[status],
+        emptyText: 'Захиалга алга байна.',
+        confirmFor: (status) => (status === 'cancelled' ? 'Захиалгыг цуцлах уу? Бүтээгдэхүүнүүд үлдэгдэлд буцаж нэмэгдэнэ.' : ''),
+        afterStatusChange: (status) => { if (status === 'cancelled') loadProducts(); }, // stock changed
+        itemHtml: (order, { statusBadge, actionsHtml }) => {
+            const c = order.customer;
+            const items = order.items.map((item) => `
+                <li><span>${escapeHtml(item.title)} &times; ${item.quantity}</span><span>${formatPrice(item.unitPrice * item.quantity)}</span></li>`).join('');
+            return `
+                <details class="inbox-card">
+                    <summary>
+                        <span class="inbox-key">#${order.orderNumber}</span>
+                        <span class="inbox-name">${escapeHtml(c.name)}</span>
+                        <span class="inbox-amount">${formatPrice(order.total)}</span>
+                        ${summaryDate(order.createdAt)}
+                        ${statusBadge(order.status)}
+                    </summary>
+                    <div class="inbox-body">
+                        <ul class="order-items">${items}
+                            <li class="order-items-total"><span>Нийт</span><span>${formatPrice(order.total)}</span></li>
+                        </ul>
+                        <dl class="inbox-details">
+                            ${contactRows(c)}
+                            <dt>Хаяг</dt><dd class="pre-wrap">${escapeHtml(c.address)}</dd>
+                            ${c.note ? `<dt>Тэмдэглэл</dt><dd class="pre-wrap">${escapeHtml(c.note)}</dd>` : ''}
+                            <dt>Төлбөр</dt><dd>Хүргэлтээр бэлнээр</dd>
+                        </dl>
+                        ${actionsHtml(order)}
+                    </div>
+                </details>`;
+        },
+    });
+    const loadOrders = ordersInbox.load;
+
+    // Enrollment statuses can move freely (no stock involved); show every other status.
+    const ENROLLMENT_STATUS_LABELS = { new: 'Шинэ', contacted: 'Холбогдсон', enrolled: 'Бүртгэгдсэн', cancelled: 'Цуцлагдсан' };
+    const ENROLLMENT_ACTION_STYLE = { new: 'btn-secondary', contacted: 'btn-primary', enrolled: 'btn-primary', cancelled: 'btn-danger' };
+
+    const enrollmentsInbox = createInbox({
+        name: 'enrollments',
+        url: '/api/admin/enrollments',
+        responseKey: 'enrollments',
+        statusLabels: ENROLLMENT_STATUS_LABELS,
+        actionsFor: (current) => Object.entries(ENROLLMENT_STATUS_LABELS)
+            .filter(([status]) => status !== current)
+            .map(([status, label]) => [status, label, ENROLLMENT_ACTION_STYLE[status]]),
+        emptyText: 'Бүртгэлийн хүсэлт алга байна.',
+        itemHtml: (e, { statusBadge, actionsHtml }) => `
+            <details class="inbox-card">
+                <summary>
+                    <span class="inbox-key">${escapeHtml(e.courseTitle)}</span>
+                    <span class="inbox-name">${escapeHtml(e.name)}</span>
+                    ${summaryDate(e.createdAt)}
+                    ${statusBadge(e.status)}
+                </summary>
+                <div class="inbox-body">
+                    <dl class="inbox-details">
+                        <dt>Хичээл</dt><dd>${escapeHtml(e.courseTitle)}</dd>
+                        ${contactRows(e)}
+                        ${e.note ? `<dt>Тэмдэглэл</dt><dd class="pre-wrap">${escapeHtml(e.note)}</dd>` : ''}
+                    </dl>
+                    ${actionsHtml(e)}
+                </div>
+            </details>`,
+    });
+    const loadEnrollments = enrollmentsInbox.load;
+
+    // ==================================================
     // TD Products
     // ==================================================
+
+    const LOW_STOCK = 3;
 
     async function loadProducts() {
         await renderList({
@@ -376,8 +543,11 @@
             itemHtml: (p) => `
                 ${thumbHtml(p.images && p.images[0] && p.images[0].url)}
                 <div class="item-info">
-                    <div class="item-title">${escapeHtml(p.title)} &mdash; ${escapeHtml(p.price)}</div>
-                    <div class="item-subtitle">${escapeHtml(p.description)}</div>
+                    <div class="item-title">${escapeHtml(p.title)} &mdash; ${formatPrice(p.price)}</div>
+                    <div class="item-subtitle">
+                        <span class="stock-tag${p.stock === 0 ? ' is-out' : p.stock <= LOW_STOCK ? ' is-low' : ''}">Үлдэгдэл: ${p.stock ?? 0}</span>
+                        ${escapeHtml(p.description)}
+                    </div>
                 </div>`,
             onEdit: showProductForm,
             onDelete: (p) => deleteItem('/api/admin/products/' + p._id, loadProducts),
@@ -400,13 +570,17 @@
                 </div>
                 <div class="form-row-pair">
                     <div class="form-row">
-                        <label>Үнэ</label>
-                        <input type="text" name="price" value="${escapeHtml(product?.price)}" placeholder="99000₮">
+                        <label>Үнэ (₮)</label>
+                        <input type="number" name="price" value="${product ? product.price : ''}" min="0" step="1" inputmode="numeric" placeholder="99000" required>
                     </div>
                     <div class="form-row">
-                        <label>Ангилал</label>
-                        <input type="text" name="category" value="${escapeHtml(product?.category)}" placeholder="electronics">
+                        <label>Үлдэгдэл (ширхэг)</label>
+                        <input type="number" name="stock" value="${product ? product.stock ?? 0 : 0}" min="0" step="1" inputmode="numeric" required>
                     </div>
+                </div>
+                <div class="form-row">
+                    <label>Ангилал</label>
+                    <input type="text" name="category" value="${escapeHtml(product?.category)}" placeholder="electronics">
                 </div>
                 <div class="form-row">
                     <label>Тайлбар</label>
@@ -645,6 +819,13 @@
 
     document.getElementById('surgalt-courses-add-btn').addEventListener('click', () => showCourseForm(null));
 
+    // Level/format labels are shared with the public course popup (html-utils.js).
+    const COURSE_LEVEL_LABELS = { '': '—', ...window.COURSE_LEVELS };
+    const COURSE_FORMAT_LABELS = { '': '—', ...window.COURSE_FORMATS };
+
+    const optionsHtml = (labels, selected = '') => Object.entries(labels)
+        .map(([value, label]) => `<option value="${value}" ${value === selected ? 'selected' : ''}>${label}</option>`).join('');
+
     function showCourseForm(course) {
         const container = document.getElementById('surgalt-courses-form-container');
         const isEdit = !!course;
@@ -677,19 +858,58 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-row-pair">
-                    <div class="form-row">
-                        <label>Холбоосын бичээс</label>
-                        <input type="text" name="linkText" value="${escapeHtml(course?.linkText || 'Дэлгэрэнгүй Үзэх')}">
-                    </div>
-                    <div class="form-row">
-                        <label>Холбоосын URL</label>
-                        <input type="text" name="linkHref" value="${escapeHtml(course?.linkHref || '#')}">
-                    </div>
-                </div>
                 <div class="form-row">
                     <label>Дараалал (байрлал, 0 = эхний)</label>
                     <input type="number" name="order" value="${course ? course.order : 0}" min="0">
+                </div>
+
+                <h4 class="form-subheading">Дэлгэрэнгүй (popup)</h4>
+                <p class="section-hint">"Дэлгэрэнгүй үзэх" дээр дарахад гарч ирнэ. Хоосон талбар харагдахгүй.</p>
+                <div class="form-row">
+                    <label>Дэлгэрэнгүй тайлбар</label>
+                    <textarea name="details" rows="5" placeholder="Хоосон мөрөөр догол мөр тусгаарлана.">${escapeHtml(course?.details)}</textarea>
+                </div>
+                <div class="form-row-pair">
+                    <div class="form-row">
+                        <label>Үргэлжлэх хугацаа</label>
+                        <input type="text" name="duration" value="${escapeHtml(course?.duration)}" placeholder="8 долоо хоног">
+                    </div>
+                    <div class="form-row">
+                        <label>Хуваарь</label>
+                        <input type="text" name="schedule" value="${escapeHtml(course?.schedule)}" placeholder="Да, Лх 19:00–21:00">
+                    </div>
+                </div>
+                <div class="form-row-pair">
+                    <div class="form-row">
+                        <label>Эхлэх огноо</label>
+                        <input type="date" name="startDate" value="${course?.startDate ? String(course.startDate).slice(0, 10) : ''}">
+                    </div>
+                    <div class="form-row">
+                        <label>Багш</label>
+                        <input type="text" name="instructor" value="${escapeHtml(course?.instructor)}">
+                    </div>
+                </div>
+                <div class="form-row-pair">
+                    <div class="form-row">
+                        <label>Түвшин</label>
+                        <select name="level">
+                            ${optionsHtml(COURSE_LEVEL_LABELS, course?.level)}
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>Хэлбэр</label>
+                        <select name="format">
+                            ${optionsHtml(COURSE_FORMAT_LABELS, course?.format)}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>Юу сурах вэ (мөр бүрт нэг)</label>
+                    <textarea name="outcomes" rows="4" placeholder="React-ийн үндсийг ойлгоно&#10;Өөрийн вэб апп бүтээнэ">${escapeHtml((course?.outcomes || []).join('\n'))}</textarea>
+                </div>
+                <div class="form-row">
+                    <label>Шаардлага (мөр бүрт нэг)</label>
+                    <textarea name="requirements" rows="3" placeholder="Компьютер ашиглах анхан шатны чадвар">${escapeHtml((course?.requirements || []).join('\n'))}</textarea>
                 </div>
                 <div class="form-row">
                     <label>Зураг</label>

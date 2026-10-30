@@ -9,6 +9,31 @@ window.escapeHtml = function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 };
 
+// Form rules shared by the contact form, checkout and course enrollment
+// (the server applies the same rules in server/validation.js).
+window.isValidPhone = (value) => /^\d{8}$/.test(String(value).replace(/[\s\-()]/g, ''));
+window.isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value).trim());
+
+// Course level/format values (server/models/Course.js) -> labels.
+window.COURSE_LEVELS = { beginner: 'Анхан', intermediate: 'Дунд', advanced: 'Ахисан' };
+window.COURSE_FORMATS = { online: 'Онлайн', classroom: 'Танхим', hybrid: 'Хосолсон' };
+
+// Whole tögrög -> "1,289,000₮" (the site's existing price style).
+const PRICE_FORMAT = new Intl.NumberFormat('mn-MN');
+window.formatPrice = function formatPrice(amount) {
+    return `${PRICE_FORMAT.format(Number(amount) || 0)}₮`;
+};
+
+// "2024.03.15" / "2024.03.15 16:43". Numeric on purpose: Chrome ships without
+// Mongolian locale data, so Intl month names silently fall back to English.
+window.formatDate = function formatDate(value, { time = false, utc = false } = {}) {
+    const d = new Date(value);
+    const get = (local, utcGetter) => (utc ? d[utcGetter]() : d[local]());
+    const pad = (n) => String(n).padStart(2, '0');
+    const date = `${get('getFullYear', 'getUTCFullYear')}.${pad(get('getMonth', 'getUTCMonth') + 1)}.${pad(get('getDate', 'getUTCDate'))}`;
+    return time ? `${date} ${pad(get('getHours', 'getUTCHours'))}:${pad(get('getMinutes', 'getUTCMinutes'))}` : date;
+};
+
 // CMS links may only be relative paths, #anchors, http(s), mailto: or tel:.
 // Anything else (javascript:, data:, ...) is replaced with "#".
 window.safeUrl = function safeUrl(value) {
